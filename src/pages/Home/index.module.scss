@@ -25,12 +25,47 @@
   gap: 28px;
 }
 
-.search {
+.searchRow {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
   width: 100%;
 }
 
-.filtersSection {
-  width: 100%;
+.searchInput {
+  flex: 1;
+  min-width: 0;
+}
+
+.filterBtn {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(16, 51, 29, 0.15);
+  border-radius: 14px;
+  background: #fff;
+  color: #10331d;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.2s ease, background 0.2s ease;
+
+  &:hover {
+    border-color: #10331d;
+    background: rgba(16, 51, 29, 0.04);
+  }
+}
+
+.filterBadge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10331d;
 }
 
 .featured {
@@ -73,7 +108,7 @@
   display: flex;
   gap: 16px;
   overflow-x: auto;
-  padding: 8px 0 16px;
+  padding: 8px 20px 16px 20px;
   margin: 0 -20px;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
@@ -85,6 +120,11 @@
   > * {
     scroll-snap-align: start;
   }
+}
+
+.reviewCardWrap {
+  flex: 0 0 280px;
+  min-width: 280px;
 }
 
 .leaveReview {

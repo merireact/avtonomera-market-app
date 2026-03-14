@@ -8,7 +8,6 @@ import styles from './index.module.scss';
 const PAGE_SIZE = 20;
 
 export function Numbers() {
-  const [favorites, setFavorites] = useState(new Set());
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState({
@@ -50,15 +49,6 @@ export function Numbers() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [hasMore, loadMore]);
 
-  const toggleFavorite = (id) => {
-    setFavorites((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -74,11 +64,7 @@ export function Numbers() {
         <ul className={styles.list}>
           {visible.map((item) => (
             <li key={item.id}>
-              <NumberCard
-                item={item}
-                isFavorite={favorites.has(item.id)}
-                onToggleFavorite={toggleFavorite}
-              />
+              <NumberCard item={item} />
             </li>
           ))}
         </ul>

@@ -2,7 +2,9 @@
   min-height: 100vh;
   padding: 24px 20px 100px;
   max-width: 640px;
+  width: 100%;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .header {
@@ -30,6 +32,11 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  width: 100%;
+}
+
+.list li {
+  width: 100%;
 }
 
 .leaveReview {

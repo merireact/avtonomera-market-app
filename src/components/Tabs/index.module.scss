@@ -1,12 +1,16 @@
 .tabs {
   display: flex;
   gap: 12px;
-  flex-wrap: wrap;
-  justify-content: center;
+  width: 100%;
 }
 
 .tab {
-  padding: 12px 24px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
   border: none;
   border-radius: 14px;
   background: rgba(16, 51, 29, 0.08);
@@ -21,6 +25,10 @@
     background: rgba(16, 51, 29, 0.12);
     color: #10331d;
   }
+}
+
+.icon {
+  flex-shrink: 0;
 }
 
 .active {

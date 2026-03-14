@@ -1,8 +1,12 @@
 import { useNavigate } from 'react-router-dom';
+import { useFavorites } from '../../context/FavoritesContext';
 import styles from './index.module.scss';
 
-export function NumberCard({ item, isFavorite, onToggleFavorite }) {
+export function NumberCard({ item, isFavorite: isFavoriteProp, onToggleFavorite: onToggleFavoriteProp }) {
   const navigate = useNavigate();
+  const { isFavorite: isFavoriteCtx, toggleFavorite: toggleFavoriteCtx } = useFavorites();
+  const isFavorite = isFavoriteProp ?? isFavoriteCtx(item.id);
+  const onToggleFavorite = onToggleFavoriteProp ?? (() => toggleFavoriteCtx(item.id));
   const priceFormatted =
     typeof item.price === 'string'
       ? item.price
@@ -11,10 +15,10 @@ export function NumberCard({ item, isFavorite, onToggleFavorite }) {
   return (
     <article
       className={styles.card}
-      onClick={() => navigate(`/numbers?id=${item.id}`)}
+      onClick={() => navigate(`/numbers/${item.id}`)}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => e.key === 'Enter' && navigate(`/numbers?id=${item.id}`)}
+      onKeyDown={(e) => e.key === 'Enter' && navigate(`/numbers/${item.id}`)}
     >
       <div className={styles.left}>
         <button
@@ -22,7 +26,7 @@ export function NumberCard({ item, isFavorite, onToggleFavorite }) {
           className={styles.favorite}
           onClick={(e) => {
             e.stopPropagation();
-            onToggleFavorite?.(item.id);
+            onToggleFavorite(item.id);
           }}
           aria-label={isFavorite ? 'Убрать из избранного' : 'В избранное'}
         >

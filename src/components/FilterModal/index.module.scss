@@ -1,0 +1,86 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.legend {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(16, 51, 29, 0.85);
+  margin-bottom: 12px;
+  display: block;
+}
+
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(16, 51, 29, 0.15);
+  transition: background 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    background: rgba(16, 51, 29, 0.04);
+    border-color: rgba(16, 51, 29, 0.25);
+  }
+}
+
+.radio {
+  width: 18px;
+  height: 18px;
+  accent-color: #10331d;
+}
+
+.radioText {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9375rem;
+  color: #10331d;
+}
+
+.rangeRow {
+  display: flex;
+  gap: 12px;
+}
+
+.rangeField {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgba(16, 51, 29, 0.7);
+}
+
+.input {
+  width: 100%;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(16, 51, 29, 0.08);
+}

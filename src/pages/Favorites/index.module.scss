@@ -14,7 +14,7 @@
   font-size: 1.5rem;
   font-weight: 600;
   color: #10331d;
-  margin: 0 0 12px 0;
+  margin: 0 0 8px 0;
 }
 
 .subtitle {
@@ -22,4 +22,41 @@
   font-size: 0.9375rem;
   color: rgba(16, 51, 29, 0.65);
   margin: 0;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.emptyIcon {
+  color: rgba(16, 51, 29, 0.25);
+  margin-bottom: 20px;
+}
+
+.emptyText {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9375rem;
+  color: rgba(16, 51, 29, 0.6);
+  margin: 0;
+  max-width: 260px;
 }

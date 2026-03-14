@@ -4,7 +4,7 @@ import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { NumberCard } from '../../components/NumberCard';
 import { Tabs } from '../../components/Tabs';
-import { Filters } from '../../components/Filters';
+import { FilterModal } from '../../components/FilterModal';
 import { ReviewCard } from '../../components/ReviewCard';
 import numbersData from '../../data/numbers.json';
 import reviewsData from '../../data/reviews.json';
@@ -15,47 +15,65 @@ const REGION_TABS = [
   { value: 'region', label: 'Московская область' },
 ];
 
+function getPriceNum(item) {
+  const p = item.price;
+  if (typeof p === 'number') return p;
+  return null; // договорная
+}
+
 export function Home() {
   const navigate = useNavigate();
   const [region, setRegion] = useState('moscow');
   const [search, setSearch] = useState('');
-  const [filters, setFilters] = useState({
-    vip: false,
-    beautiful: false,
-    free: false,
-    sameDigits: false,
-    sameLetters: false,
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
+  const [filterValues, setFilterValues] = useState({
+    priceSort: undefined,
+    priceMin: undefined,
+    priceMax: undefined,
   });
-  const [favorites, setFavorites] = useState(new Set());
 
   const featuredNumbers = useMemo(() => {
-    return numbersData
-      .filter((n) => {
-        if (region === 'moscow' && n.city !== 'Москва') return false;
-        if (region === 'region' && n.city !== 'Московская область') return false;
-        if (search.trim()) {
-          const q = search.trim().toLowerCase();
-          if (!n.number.toLowerCase().includes(q) && !n.city.toLowerCase().includes(q)) return false;
-        }
-        if (filters.vip && !n.vip) return false;
-        if (filters.beautiful && !n.beautiful) return false;
-        if (filters.free && n.status !== 'Свободен') return false;
-        if (filters.sameDigits && !n.sameDigits) return false;
-        if (filters.sameLetters && !n.sameLetters) return false;
-        return true;
-      })
-      .filter((n) => n.beautiful)
-      .slice(0, 8);
-  }, [region, search, filters]);
+    let list = numbersData.filter((n) => {
+      if (region === 'moscow' && n.city !== 'Москва') return false;
+      if (region === 'region' && n.city !== 'Московская область') return false;
+      if (search.trim()) {
+        const q = search.trim().toLowerCase();
+        if (!n.number.toLowerCase().includes(q) && !n.city.toLowerCase().includes(q)) return false;
+      }
+      return true;
+    }).filter((n) => n.beautiful);
 
-  const toggleFavorite = (id) => {
-    setFavorites((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
+    const { priceMin, priceMax, priceSort } = filterValues;
+    if (priceMin != null || priceMax != null) {
+      list = list.filter((n) => {
+        const num = getPriceNum(n);
+        if (num === null) return false;
+        if (priceMin != null && num < priceMin) return false;
+        if (priceMax != null && num > priceMax) return false;
+        return true;
+      });
+    }
+    if (priceSort === 'asc') {
+      list = [...list].sort((a, b) => {
+        const pa = getPriceNum(a);
+        const pb = getPriceNum(b);
+        if (pa === null && pb === null) return 0;
+        if (pa === null) return 1;
+        if (pb === null) return -1;
+        return pa - pb;
+      });
+    } else if (priceSort === 'desc') {
+      list = [...list].sort((a, b) => {
+        const pa = getPriceNum(a);
+        const pb = getPriceNum(b);
+        if (pa === null && pb === null) return 0;
+        if (pa === null) return 1;
+        if (pb === null) return -1;
+        return pb - pa;
+      });
+    }
+    return list.slice(0, 8);
+  }, [region, search, filterValues]);
 
   return (
     <div className={styles.page}>
@@ -65,24 +83,37 @@ export function Home() {
       </header>
 
       <main className={styles.main}>
-        <div className={styles.search}>
-          <Input placeholder="Поиск номера..." value={search} onChange={setSearch} />
+        <div className={styles.searchRow}>
+          <Input placeholder="Поиск номера..." value={search} onChange={setSearch} className={styles.searchInput} />
+          <button
+            type="button"
+            className={styles.filterBtn}
+            onClick={() => setFilterModalOpen(true)}
+            aria-label="Открыть фильтры"
+            title="Фильтры"
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+            </svg>
+            {(filterValues.priceSort || filterValues.priceMin != null || filterValues.priceMax != null) && (
+              <span className={styles.filterBadge} aria-hidden />
+            )}
+          </button>
         </div>
 
-        <section className={styles.filtersSection}>
-          <Filters selected={filters} onChange={setFilters} />
-        </section>
+        <FilterModal
+          open={filterModalOpen}
+          onClose={() => setFilterModalOpen(false)}
+          value={filterValues}
+          onChange={setFilterValues}
+        />
 
         <section className={styles.featured}>
-          <h2 className={styles.sectionTitle}>Избранные номера</h2>
+          <h2 className={styles.sectionTitle}>Лучшие номера</h2>
           <ul className={styles.cardList}>
             {featuredNumbers.map((item) => (
               <li key={item.id}>
-                <NumberCard
-                  item={item}
-                  isFavorite={favorites.has(item.id)}
-                  onToggleFavorite={toggleFavorite}
-                />
+                <NumberCard item={item} />
               </li>
             ))}
           </ul>
@@ -95,7 +126,9 @@ export function Home() {
           <h2 className={styles.sectionTitle}>Отзывы</h2>
           <div className={styles.reviewsScroll}>
             {reviewsData.map((review) => (
-              <ReviewCard key={review.id} {...review} />
+              <div key={review.id} className={styles.reviewCardWrap}>
+                <ReviewCard {...review} />
+              </div>
             ))}
           </div>
           <div className={styles.leaveReview}>
