@@ -3,7 +3,10 @@ import styles from './index.module.scss';
 
 export function NumberCard({ item, isFavorite, onToggleFavorite }) {
   const navigate = useNavigate();
-  const priceFormatted = new Intl.NumberFormat('ru-RU').format(item.price) + ' ₽';
+  const priceFormatted =
+    typeof item.price === 'string'
+      ? item.price
+      : new Intl.NumberFormat('ru-RU').format(item.price) + ' ₽';
 
   return (
     <article
