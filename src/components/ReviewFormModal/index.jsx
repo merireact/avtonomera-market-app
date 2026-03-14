@@ -1,14 +1,25 @@
 import { useState } from 'react';
 import { Input } from '../Input';
 import { Button } from '../Button';
+import { useTelegram } from '../../context/TelegramContext';
 import styles from './index.module.scss';
 
 const MIN_TEXT_LENGTH = 10;
 const MAX_TEXT_LENGTH = 1000;
 const MAX_NAME_LENGTH = 100;
 
+function getDisplayName(user) {
+  if (!user) return '';
+  const parts = [user.first_name, user.last_name].filter(Boolean);
+  return parts.join(' ') || 'Пользователь';
+}
+
 export function ReviewFormModal({ onSubmit, onCancel }) {
-  const [name, setName] = useState('');
+  const { user: telegramUser } = useTelegram();
+  const telegramName = telegramUser ? getDisplayName(telegramUser).trim() : '';
+  const nameFromTelegram = telegramName.length > 0 && telegramName.length <= MAX_NAME_LENGTH ? telegramName : null;
+
+  const [manualName, setManualName] = useState('');
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [text, setText] = useState('');
@@ -16,6 +27,8 @@ export function ReviewFormModal({ onSubmit, onCancel }) {
   const [error, setError] = useState('');
 
   const displayRating = hoverRating || rating;
+
+  const name = nameFromTelegram ?? manualName;
 
   const validate = () => {
     const trimmedName = name.trim();
@@ -66,15 +79,22 @@ export function ReviewFormModal({ onSubmit, onCancel }) {
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
-      <label className={styles.label}>
-        Ваше имя
-        <Input
-          placeholder="Например: А. Петров"
-          value={name}
-          onChange={setName}
-          className={styles.input}
-        />
-      </label>
+      {nameFromTelegram ? (
+        <div className={styles.label}>
+          <span className={styles.labelText}>От имени</span>
+          <p className={styles.telegramName}>{nameFromTelegram}</p>
+        </div>
+      ) : (
+        <label className={styles.label}>
+          Ваше имя
+          <Input
+            placeholder="Например: А. Петров"
+            value={manualName}
+            onChange={setManualName}
+            className={styles.input}
+          />
+        </label>
+      )}
       <label className={styles.label}>
         Оценка
         <div className={styles.starsRow} role="group" aria-label="Оценка от 1 до 5">
