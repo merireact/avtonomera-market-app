@@ -30,6 +30,8 @@ export function NumberDetail() {
   }
 
   const favorite = isFavorite(item.id);
+  const telegramMessage = `Здравствуйте, интересует этот номер: ${item.number}`;
+  const telegramUrl = `https://t.me/nomeramarket_direct?text=${encodeURIComponent(telegramMessage)}`;
 
   return (
     <div className={styles.page}>
@@ -99,7 +101,7 @@ export function NumberDetail() {
                 <span>+7 999 599-91-77</span>
               </a>
               <a
-                href="https://t.me/nomeramarket_direct"
+                href={telegramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={styles.contactBtn}
