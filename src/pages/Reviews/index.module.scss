@@ -8,15 +8,31 @@
 }
 
 .header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   margin-bottom: 24px;
 }
 
 .title {
-  font-family: 'Playfair Display', serif;
+  font-family: 'PT Serif', Georgia, serif;
   font-size: 1.5rem;
   font-weight: 600;
   color: #10331d;
   margin: 0;
+}
+
+.leaveReviewBtn {
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btnIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .main {
@@ -39,8 +55,15 @@
   width: 100%;
 }
 
-.leaveReview {
-  margin-top: 24px;
-  display: flex;
-  justify-content: center;
+.loading,
+.error {
+  margin: 0;
+  padding: 12px 0;
+  color: #10331d;
+  font-size: 0.95rem;
 }
+
+.error {
+  color: #8b2e2e;
+}
+

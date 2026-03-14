@@ -2,6 +2,10 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Отзывы (Supabase)
+
+Чтобы пользователи могли оставлять отзывы и видеть их всем, настройте [Supabase](https://supabase.com): создайте проект, таблицу и политики RLS по инструкции в [docs/supabase-setup.md](docs/supabase-setup.md). Скопируйте `.env.example` в `.env.local`, укажите `REACT_APP_SUPABASE_URL` и `REACT_APP_SUPABASE_ANON_KEY`, перезапустите `npm start`. Без ключей приложение показывает статические отзывы из репозитория.
+
 ## Available Scripts
 
 In the project directory, you can run:

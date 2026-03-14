@@ -30,7 +30,8 @@ export function NumberDetail() {
   }
 
   const favorite = isFavorite(item.id);
-  const telegramMessage = `Здравствуйте, интересует этот номер: ${item.number}`;
+  const numberSlitno = item.number.replace(/\s/g, '');
+  const telegramMessage = `Здравствуйте, интересует этот номер: ${numberSlitno}`;
   const telegramUrl = `https://t.me/nomeramarket_direct?text=${encodeURIComponent(telegramMessage)}`;
 
   return (
@@ -52,7 +53,7 @@ export function NumberDetail() {
       <main className={styles.main}>
         <article className={styles.card}>
           <div className={styles.cardHeader}>
-            <div className={styles.number}>{item.number}</div>
+            <div className={styles.number}>{numberSlitno}</div>
             <button
               type="button"
               className={styles.favorite}

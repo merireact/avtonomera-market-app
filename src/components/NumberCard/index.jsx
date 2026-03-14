@@ -35,10 +35,7 @@ export function NumberCard({ item, isFavorite: isFavoriteProp, onToggleFavorite:
           </svg>
         </button>
         <div className={styles.info}>
-          <div className={styles.number}>{item.number}</div>
-          <div className={styles.meta}>
-            {item.city} • {item.status}
-          </div>
+          <div className={styles.number}>{item.number.replace(/\s/g, '')}</div>
         </div>
       </div>
       <div className={styles.right}>

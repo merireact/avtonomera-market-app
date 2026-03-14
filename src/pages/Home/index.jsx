@@ -6,8 +6,8 @@ import { NumberCard } from '../../components/NumberCard';
 import { Tabs } from '../../components/Tabs';
 import { FilterModal } from '../../components/FilterModal';
 import { ReviewCard } from '../../components/ReviewCard';
+import { useReviews } from '../../hooks/useReviews';
 import numbersData from '../../data/numbers.json';
-import reviewsData from '../../data/reviews.json';
 import styles from './index.module.scss';
 
 const REGION_TABS = [
@@ -23,6 +23,7 @@ function getPriceNum(item) {
 
 export function Home() {
   const navigate = useNavigate();
+  const { reviews: reviewsData, loading: reviewsLoading } = useReviews();
   const [region, setRegion] = useState('moscow');
   const [search, setSearch] = useState('');
   const [filterModalOpen, setFilterModalOpen] = useState(false);
@@ -78,7 +79,14 @@ export function Home() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <div className={styles.logo}>Автономера</div>
+        <div className={styles.brand}>
+          {/* <img
+            src="https://i.postimg.cc/dQb954b2/Snimok-ekrana-2026-03-14-v-22-54-22-Photoroom.png"
+            alt="Avtonomera Market"
+            className={styles.brandLogo}
+          /> */}
+          <span className={styles.brandName}>Avtonomera Market</span>
+        </div>
         <Tabs tabs={REGION_TABS} activeValue={region} onChange={setRegion} />
       </header>
 
@@ -118,21 +126,48 @@ export function Home() {
             ))}
           </ul>
           <div className={styles.showMore}>
-            <Button onClick={() => navigate('/numbers')}>Показать больше номеров</Button>
+            <Button onClick={() => navigate('/numbers')} className={styles.showMoreBtn}>
+              <span className={styles.btnIcon} aria-hidden>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="8" y1="6" x2="21" y2="6" />
+                  <line x1="8" y1="12" x2="21" y2="12" />
+                  <line x1="8" y1="18" x2="21" y2="18" />
+                  <line x1="3" y1="6" x2="3.01" y2="6" />
+                  <line x1="3" y1="12" x2="3.01" y2="12" />
+                  <line x1="3" y1="18" x2="3.01" y2="18" />
+                </svg>
+              </span>
+              Показать больше номеров
+            </Button>
           </div>
         </section>
 
         <section className={styles.reviews}>
           <h2 className={styles.sectionTitle}>Отзывы</h2>
-          <div className={styles.reviewsScroll}>
-            {reviewsData.map((review) => (
-              <div key={review.id} className={styles.reviewCardWrap}>
-                <ReviewCard {...review} />
-              </div>
-            ))}
-          </div>
+          {reviewsLoading ? (
+            <p className={styles.reviewsLoading}>Загрузка отзывов...</p>
+          ) : (
+            <div className={styles.reviewsScroll}>
+              {reviewsData.map((review) => (
+                <div key={review.id} className={styles.reviewCardWrap}>
+                  <ReviewCard {...review} />
+                </div>
+              ))}
+            </div>
+          )}
           <div className={styles.leaveReview}>
-            <Button variant="secondary" onClick={() => {}}>Оставить отзыв</Button>
+            <Button
+              variant="secondary"
+              onClick={() => navigate('/reviews', { state: { openReview: true } })}
+              className={styles.leaveReviewBtn}
+            >
+              <span className={styles.btnIcon} aria-hidden>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+              </span>
+              Оставить отзыв
+            </Button>
           </div>
         </section>
       </main>
