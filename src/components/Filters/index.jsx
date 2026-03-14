@@ -1,8 +1,7 @@
 import styles from './index.module.scss';
 
 const FILTER_OPTIONS = [
-  { key: 'vip', label: 'VIP' },
-  { key: 'beautiful', label: 'Красивые' },
+  { key: 'vip', label: 'Эксклюзивный' },
   { key: 'free', label: 'Свободные' },
   { key: 'sameDigits', label: 'Одинаковые цифры' },
   { key: 'sameLetters', label: 'Одинаковые буквы' },

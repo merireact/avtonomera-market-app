@@ -1,37 +1,66 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { NumberCard } from '../../components/NumberCard';
 import { Input } from '../../components/Input';
+import { Tabs } from '../../components/Tabs';
 import { Filters } from '../../components/Filters';
 import numbersData from '../../data/numbers.json';
+import { getRegionByNumber } from '../../utils/regions';
+import { hasSameMiddleDigits, hasSameLetters } from '../../utils/numberUtils';
 import styles from './index.module.scss';
 
 const PAGE_SIZE = 20;
 
+const REGION_TABS = [
+  { value: 'all', label: 'Все' },
+  { value: 'moscow', label: 'Москва' },
+  { value: 'region', label: 'Московская область' },
+];
+
 export function Numbers() {
+  const location = useLocation();
+  const stateFilters = location.state?.filters;
+  const stateSearch = location.state?.search ?? '';
+  const [region, setRegion] = useState(location.state?.region ?? 'all');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(typeof stateSearch === 'string' ? stateSearch : '');
   const [filters, setFilters] = useState({
-    vip: false,
-    beautiful: false,
-    free: false,
-    sameDigits: false,
-    sameLetters: false,
+    vip: stateFilters?.exclusive ?? false,
+    free: stateFilters?.free ?? false,
+    sameDigits: stateFilters?.sameDigits ?? false,
+    sameLetters: stateFilters?.sameLetters ?? false,
   });
+
+  useEffect(() => {
+    const fromState = location.state;
+    if (fromState?.region === 'moscow' || fromState?.region === 'region') setRegion(fromState.region);
+    if (typeof fromState?.search === 'string') setSearch(fromState.search);
+    if (fromState?.filters) {
+      setFilters({
+        vip: fromState.filters.exclusive ?? false,
+        free: fromState.filters.free ?? false,
+        sameDigits: fromState.filters.sameDigits ?? false,
+        sameLetters: fromState.filters.sameLetters ?? false,
+      });
+    }
+  }, [location.state]);
 
   const filtered = useMemo(() => {
     return numbersData.filter((item) => {
+      const numberRegion = getRegionByNumber(item.number);
+      if (region === 'moscow' && numberRegion !== 'Москва') return false;
+      if (region === 'region' && numberRegion !== 'Московская область') return false;
       if (search.trim()) {
         const q = search.trim().toLowerCase();
         if (!item.number.toLowerCase().includes(q) && !item.city.toLowerCase().includes(q)) return false;
       }
       if (filters.vip && !item.vip) return false;
-      if (filters.beautiful && !item.beautiful) return false;
       if (filters.free && item.status !== 'Свободен') return false;
-      if (filters.sameDigits && !item.sameDigits) return false;
-      if (filters.sameLetters && !item.sameLetters) return false;
+      if (filters.sameDigits && !hasSameMiddleDigits(item.number)) return false;
+      if (filters.sameLetters && !hasSameLetters(item.number)) return false;
       return true;
     });
-  }, [search, filters]);
+  }, [search, filters, region]);
 
   const visible = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
   const hasMore = visibleCount < filtered.length;
@@ -53,6 +82,9 @@ export function Numbers() {
     <div className={styles.page}>
       <header className={styles.header}>
         <h1 className={styles.title}>Все номера</h1>
+        <div className={styles.tabsWrap}>
+          <Tabs tabs={REGION_TABS} activeValue={region} onChange={setRegion} />
+        </div>
         <div className={styles.search}>
           <Input placeholder="Поиск номера..." value={search} onChange={setSearch} />
         </div>

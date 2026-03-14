@@ -9,18 +9,33 @@ const SORT_OPTIONS = [
   { value: 'desc', label: 'Сначала дорогие' },
 ];
 
+const CHECKBOX_FILTERS = [
+  { key: 'exclusive', label: 'Эксклюзивный' },
+  { key: 'free', label: 'Свободные' },
+  { key: 'sameDigits', label: 'Одинаковые цифры' },
+  { key: 'sameLetters', label: 'Одинаковые буквы' },
+];
+
 export function FilterModal({ open, onClose, value, onChange }) {
   const [sort, setSort] = useState(value?.priceSort ?? '');
   const [minPrice, setMinPrice] = useState(value?.priceMin ?? '');
   const [maxPrice, setMaxPrice] = useState(value?.priceMax ?? '');
+  const [exclusive, setExclusive] = useState(value?.exclusive ?? false);
+  const [free, setFree] = useState(value?.free ?? false);
+  const [sameDigits, setSameDigits] = useState(value?.sameDigits ?? false);
+  const [sameLetters, setSameLetters] = useState(value?.sameLetters ?? false);
 
   useEffect(() => {
     if (open) {
       setSort(value?.priceSort ?? '');
       setMinPrice(value?.priceMin != null ? String(value.priceMin) : '');
       setMaxPrice(value?.priceMax != null ? String(value.priceMax) : '');
+      setExclusive(value?.exclusive ?? false);
+      setFree(value?.free ?? false);
+      setSameDigits(value?.sameDigits ?? false);
+      setSameLetters(value?.sameLetters ?? false);
     }
-  }, [open, value?.priceSort, value?.priceMin, value?.priceMax]);
+  }, [open, value?.priceSort, value?.priceMin, value?.priceMax, value?.exclusive, value?.free, value?.sameDigits, value?.sameLetters]);
 
   const handleApply = () => {
     const numMin = minPrice === '' ? undefined : Number(minPrice);
@@ -29,6 +44,10 @@ export function FilterModal({ open, onClose, value, onChange }) {
       priceSort: sort || undefined,
       priceMin: numMin,
       priceMax: numMax,
+      exclusive,
+      free,
+      sameDigits,
+      sameLetters,
     });
     onClose?.();
   };
@@ -37,7 +56,19 @@ export function FilterModal({ open, onClose, value, onChange }) {
     setSort('');
     setMinPrice('');
     setMaxPrice('');
-    onChange?.({ priceSort: undefined, priceMin: undefined, priceMax: undefined });
+    setExclusive(false);
+    setFree(false);
+    setSameDigits(false);
+    setSameLetters(false);
+    onChange?.({
+      priceSort: undefined,
+      priceMin: undefined,
+      priceMax: undefined,
+      exclusive: false,
+      free: false,
+      sameDigits: false,
+      sameLetters: false,
+    });
     onClose?.();
   };
 
@@ -60,6 +91,27 @@ export function FilterModal({ open, onClose, value, onChange }) {
                 <span className={styles.radioText}>{opt.label}</span>
               </label>
             ))}
+          </div>
+        </fieldset>
+
+        <fieldset className={styles.fieldset}>
+          <legend className={styles.legend}>Параметры</legend>
+          <div className={styles.checkboxGroup}>
+            {CHECKBOX_FILTERS.map(({ key, label }) => {
+              const checked = key === 'exclusive' ? exclusive : key === 'free' ? free : key === 'sameDigits' ? sameDigits : sameLetters;
+              const setChecked = key === 'exclusive' ? setExclusive : key === 'free' ? setFree : key === 'sameDigits' ? setSameDigits : setSameLetters;
+              return (
+                <label key={key} className={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) => setChecked(e.target.checked)}
+                    className={styles.checkbox}
+                  />
+                  <span className={styles.checkboxText}>{label}</span>
+                </label>
+              );
+            })}
           </div>
         </fieldset>
 

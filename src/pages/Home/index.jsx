@@ -8,6 +8,8 @@ import { FilterModal } from '../../components/FilterModal';
 import { ReviewCard } from '../../components/ReviewCard';
 import { useReviews } from '../../hooks/useReviews';
 import numbersData from '../../data/numbers.json';
+import { getRegionByNumber } from '../../utils/regions';
+import { hasSameMiddleDigits, hasSameLetters } from '../../utils/numberUtils';
 import styles from './index.module.scss';
 
 const REGION_TABS = [
@@ -31,20 +33,29 @@ export function Home() {
     priceSort: undefined,
     priceMin: undefined,
     priceMax: undefined,
+    exclusive: false,
+    free: false,
+    sameDigits: false,
+    sameLetters: false,
   });
 
   const featuredNumbers = useMemo(() => {
     let list = numbersData.filter((n) => {
-      if (region === 'moscow' && n.city !== 'Москва') return false;
-      if (region === 'region' && n.city !== 'Московская область') return false;
+      const numberRegion = getRegionByNumber(n.number);
+      if (region === 'moscow' && numberRegion !== 'Москва') return false;
+      if (region === 'region' && numberRegion !== 'Московская область') return false;
       if (search.trim()) {
         const q = search.trim().toLowerCase();
         if (!n.number.toLowerCase().includes(q) && !n.city.toLowerCase().includes(q)) return false;
       }
       return true;
-    }).filter((n) => n.beautiful);
+    });
 
-    const { priceMin, priceMax, priceSort } = filterValues;
+    const { priceMin, priceMax, priceSort, exclusive, free, sameDigits, sameLetters } = filterValues;
+    if (exclusive) list = list.filter((n) => n.vip);
+    if (free) list = list.filter((n) => n.status === 'Свободен');
+    if (sameDigits) list = list.filter((n) => hasSameMiddleDigits(n.number));
+    if (sameLetters) list = list.filter((n) => hasSameLetters(n.number));
     if (priceMin != null || priceMax != null) {
       list = list.filter((n) => {
         const num = getPriceNum(n);
@@ -103,7 +114,7 @@ export function Home() {
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
             </svg>
-            {(filterValues.priceSort || filterValues.priceMin != null || filterValues.priceMax != null) && (
+            {(filterValues.priceSort || filterValues.priceMin != null || filterValues.priceMax != null || filterValues.exclusive || filterValues.free || filterValues.sameDigits || filterValues.sameLetters) && (
               <span className={styles.filterBadge} aria-hidden />
             )}
           </button>
@@ -126,7 +137,23 @@ export function Home() {
             ))}
           </ul>
           <div className={styles.showMore}>
-            <Button onClick={() => navigate('/numbers')} className={styles.showMoreBtn}>
+            <Button
+              onClick={() =>
+                navigate('/numbers', {
+                  state: {
+                    region,
+                    search: search.trim(),
+                    filters: {
+                      exclusive: filterValues.exclusive,
+                      free: filterValues.free,
+                      sameDigits: filterValues.sameDigits,
+                      sameLetters: filterValues.sameLetters,
+                    },
+                  },
+                })
+              }
+              className={styles.showMoreBtn}
+            >
               <span className={styles.btnIcon} aria-hidden>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="8" y1="6" x2="21" y2="6" />

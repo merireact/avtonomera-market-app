@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFavorites } from '../../context/FavoritesContext';
 import numbersData from '../../data/numbers.json';
+import { hasSameMiddleDigits, hasSameLetters } from '../../utils/numberUtils';
 import styles from './index.module.scss';
 
 function formatPrice(item) {
@@ -81,12 +82,11 @@ export function NumberDetail() {
             </div>
           </dl>
 
-          {(item.vip || item.beautiful || item.sameDigits || item.sameLetters) && (
+          {(item.vip || hasSameMiddleDigits(item.number) || hasSameLetters(item.number)) && (
             <div className={styles.tags}>
-              {item.vip && <span className={styles.tag}>VIP</span>}
-              {item.beautiful && <span className={styles.tag}>Красивый</span>}
-              {item.sameDigits && <span className={styles.tag}>Одинаковые цифры</span>}
-              {item.sameLetters && <span className={styles.tag}>Одинаковые буквы</span>}
+              {item.vip && <span className={styles.tag}>Эксклюзивный</span>}
+              {hasSameMiddleDigits(item.number) && <span className={styles.tag}>Одинаковые цифры</span>}
+              {hasSameLetters(item.number) && <span className={styles.tag}>Одинаковые буквы</span>}
             </div>
           )}
 
