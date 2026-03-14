@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/avtonomera-market-app/static/css/main.ecb72cc3.css",
-    "main.js": "/avtonomera-market-app/static/js/main.a9302599.js",
+    "main.js": "/avtonomera-market-app/static/js/main.469c45e7.js",
     "static/js/453.cde4e2d9.chunk.js": "/avtonomera-market-app/static/js/453.cde4e2d9.chunk.js",
     "index.html": "/avtonomera-market-app/index.html",
     "main.ecb72cc3.css.map": "/avtonomera-market-app/static/css/main.ecb72cc3.css.map",
-    "main.a9302599.js.map": "/avtonomera-market-app/static/js/main.a9302599.js.map",
+    "main.469c45e7.js.map": "/avtonomera-market-app/static/js/main.469c45e7.js.map",
     "453.cde4e2d9.chunk.js.map": "/avtonomera-market-app/static/js/453.cde4e2d9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.ecb72cc3.css",
-    "static/js/main.a9302599.js"
+    "static/js/main.469c45e7.js"
   ]
 }
