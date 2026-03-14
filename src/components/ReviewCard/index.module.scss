@@ -1,0 +1,62 @@
+.card {
+  flex: 0 0 auto;
+  width: 280px;
+  padding: 24px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(16, 51, 29, 0.06);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #10331d;
+  color: #eee4d1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.meta {
+  min-width: 0;
+}
+
+.name {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: #10331d;
+}
+
+.stars {
+  display: block;
+  margin-top: 4px;
+  color: #10331d;
+  font-size: 0.875rem;
+  letter-spacing: 1px;
+}
+
+.text {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: rgba(16, 51, 29, 0.85);
+  margin: 0 0 12px 0;
+}
+
+.date {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8125rem;
+  color: rgba(16, 51, 29, 0.5);
+}

@@ -1,0 +1,35 @@
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pill {
+  padding: 10px 18px;
+  border: 1px solid rgba(16, 51, 29, 0.2);
+  border-radius: 999px;
+  background: #fff;
+  color: rgba(16, 51, 29, 0.8);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    border-color: #10331d;
+    color: #10331d;
+  }
+}
+
+.active {
+  background: #10331d;
+  border-color: #10331d;
+  color: #eee4d1;
+
+  &:hover {
+    background: #0d2818;
+    border-color: #0d2818;
+    color: #eee4d1;
+  }
+}

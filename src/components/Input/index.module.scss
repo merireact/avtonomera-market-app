@@ -1,0 +1,21 @@
+.input {
+  width: 100%;
+  padding: 16px 20px;
+  border: 1px solid rgba(16, 51, 29, 0.15);
+  border-radius: 14px;
+  background: #fff;
+  color: #10331d;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &::placeholder {
+    color: rgba(16, 51, 29, 0.45);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #10331d;
+    box-shadow: 0 0 0 3px rgba(16, 51, 29, 0.1);
+  }
+}

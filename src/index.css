@@ -1,0 +1,39 @@
+:root {
+  --color-dark-green: #10331d;
+  --color-beige: #eee4d1;
+  --color-beige-bg: #f8f6f1;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--color-beige-bg);
+  color: #10331d;
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+}
