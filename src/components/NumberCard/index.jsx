@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useFavorites } from '../../context/FavoritesContext';
 import styles from './index.module.scss';
 
-export function NumberCard({ item, isFavorite: isFavoriteProp, onToggleFavorite: onToggleFavoriteProp, showEditButton, onEditClick }) {
+export function NumberCard({ item, isFavorite: isFavoriteProp, onToggleFavorite: onToggleFavoriteProp }) {
   const navigate = useNavigate();
   const { isFavorite: isFavoriteCtx, toggleFavorite: toggleFavoriteCtx } = useFavorites();
   const isFavorite = isFavoriteProp ?? isFavoriteCtx(item.id);
@@ -42,18 +42,6 @@ export function NumberCard({ item, isFavorite: isFavoriteProp, onToggleFavorite:
         </div>
       </div>
       <div className={styles.right}>
-        {showEditButton && onEditClick && (
-          <button
-            type="button"
-            className={styles.editBtn}
-            onClick={(e) => {
-              e.stopPropagation();
-              onEditClick(item);
-            }}
-          >
-            Изменить
-          </button>
-        )}
         <div className={styles.price}>{priceFormatted}</div>
         <span className={styles.arrow} aria-hidden>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

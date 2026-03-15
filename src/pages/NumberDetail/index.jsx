@@ -1,6 +1,12 @@
+import { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFavorites } from '../../context/FavoritesContext';
+import { useAuth } from '../../context/AuthContext';
 import { useNumbers } from '../../hooks/useNumbers';
+import { updateNumber, deleteNumber } from '../../api/numbers';
+import { Modal } from '../../components/Modal';
+import { Button } from '../../components/Button';
+import { Input } from '../../components/Input';
 import { hasSameMiddleDigits, hasSameLetters } from '../../utils/numberUtils';
 import styles from './index.module.scss';
 
@@ -14,9 +20,62 @@ export function NumberDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isFavorite, toggleFavorite } = useFavorites();
-  const { numbers: numbersData, loading } = useNumbers();
+  const { isAdmin } = useAuth();
+  const { numbers: numbersData, loading, refetch: refetchNumbers } = useNumbers();
+  const [editOpen, setEditOpen] = useState(false);
+  const [editStatus, setEditStatus] = useState('Свободен');
+  const [editPrice, setEditPrice] = useState('');
+  const [editSaving, setEditSaving] = useState(false);
+  const [editDeleting, setEditDeleting] = useState(false);
+  const [editError, setEditError] = useState(null);
 
   const item = numbersData.find((n) => String(n.id) === id);
+
+  const openEdit = useCallback(() => {
+    if (!item) return;
+    setEditStatus(item.status || 'Свободен');
+    setEditPrice(typeof item.price === 'string' ? item.price : (item.price != null ? String(item.price) : ''));
+    setEditError(null);
+    setEditOpen(true);
+  }, [item]);
+
+  const closeEdit = useCallback(() => {
+    setEditOpen(false);
+    setEditError(null);
+  }, []);
+
+  const handleEditSave = useCallback(async (e) => {
+    e.preventDefault();
+    if (!item) return;
+    setEditError(null);
+    setEditSaving(true);
+    const priceVal = editPrice.trim() === '' || editPrice.trim().toLowerCase() === 'договорная' ? 'договорная' : editPrice.trim();
+    const { error } = await updateNumber(item.id, { status: editStatus.trim(), price: priceVal });
+    setEditSaving(false);
+    if (error) {
+      setEditError(error.message);
+      return;
+    }
+    await refetchNumbers();
+    closeEdit();
+  }, [item, editStatus, editPrice, refetchNumbers, closeEdit]);
+
+  const handleEditDelete = useCallback(async () => {
+    if (!item) return;
+    const numStr = item.number.replace(/\s/g, '');
+    if (!window.confirm(`Удалить номер ${numStr}?`)) return;
+    setEditError(null);
+    setEditDeleting(true);
+    const { error } = await deleteNumber(item.id);
+    setEditDeleting(false);
+    if (error) {
+      setEditError(error.message);
+      return;
+    }
+    await refetchNumbers();
+    closeEdit();
+    navigate('/numbers');
+  }, [item, refetchNumbers, closeEdit, navigate]);
 
   if (loading) {
     return (
@@ -127,8 +186,52 @@ export function NumberDetail() {
               </a>
             </div>
           </div>
+
+          {isAdmin && (
+            <div className={styles.adminSection}>
+              <button
+                type="button"
+                className={styles.editBtnLarge}
+                onClick={openEdit}
+              >
+                Изменить
+              </button>
+            </div>
+          )}
         </article>
       </main>
+
+      <Modal open={editOpen} onClose={closeEdit} title="Изменить номер">
+        <form className={styles.editForm} onSubmit={handleEditSave}>
+          <p className={styles.editNumber}>{numberSlitno}</p>
+          {editError && <p className={styles.editError}>{editError}</p>}
+          <label className={styles.editLabel}>
+            Статус
+            <select value={editStatus} onChange={(e) => setEditStatus(e.target.value)} className={styles.editSelect}>
+              <option value="Свободен">Свободен</option>
+              <option value="Забронирован">Забронирован</option>
+            </select>
+          </label>
+          <label className={styles.editLabel}>
+            Цена (число или «договорная»)
+            <Input value={editPrice} onChange={setEditPrice} placeholder="400000 или договорная" />
+          </label>
+          <div className={styles.editActions}>
+            <Button type="button" variant="secondary" onClick={closeEdit} disabled={editSaving || editDeleting}>Отмена</Button>
+            <Button type="submit" disabled={editSaving || editDeleting}>{editSaving ? 'Сохранение...' : 'Сохранить'}</Button>
+          </div>
+          <div className={styles.editDeleteWrap}>
+            <button
+              type="button"
+              className={styles.editDeleteBtn}
+              onClick={handleEditDelete}
+              disabled={editSaving || editDeleting}
+            >
+              {editDeleting ? 'Удаление...' : 'Удалить номер'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
