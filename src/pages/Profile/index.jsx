@@ -6,7 +6,7 @@ import styles from './index.module.scss';
 const SUPPORT_TELEGRAM = 'nomeramarket_direct';
 const SUPPORT_URL = `https://t.me/${SUPPORT_TELEGRAM}`;
 
-const ADMIN_TELEGRAM_USERNAMES = ['ironchik15', 'merireact'];
+const ADMIN_TELEGRAM_USERNAMES = ['ironchik15', 'merireact', 'halfpasffive'];
 function isAdminUser(user) {
   if (!user?.username) return false;
   return ADMIN_TELEGRAM_USERNAMES.includes(user.username.toLowerCase());
