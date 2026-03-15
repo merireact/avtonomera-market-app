@@ -1,16 +1,17 @@
 import { useMemo } from 'react';
 import { useFavorites } from '../../context/FavoritesContext';
 import { NumberCard } from '../../components/NumberCard';
-import numbersData from '../../data/numbers.json';
+import { useNumbers } from '../../hooks/useNumbers';
 import styles from './index.module.scss';
 
 export function Favorites() {
   const { favorites } = useFavorites();
+  const { numbers: numbersData, loading } = useNumbers();
 
   const favoriteItems = useMemo(() => {
     const ids = new Set(favorites);
     return numbersData.filter((n) => ids.has(n.id));
-  }, [favorites]);
+  }, [favorites, numbersData]);
 
   const isEmpty = favoriteItems.length === 0;
 
@@ -19,13 +20,15 @@ export function Favorites() {
       <header className={styles.header}>
         <h1 className={styles.title}>Избранное</h1>
         <p className={styles.subtitle}>
-          {isEmpty
-            ? 'Здесь появятся номера, которые вы добавите в избранное.'
-            : `Добавлено номеров: ${favoriteItems.length}`}
+          {loading
+            ? 'Загрузка...'
+            : isEmpty
+              ? 'Здесь появятся номера, которые вы добавите в избранное.'
+              : `Добавлено номеров: ${favoriteItems.length}`}
         </p>
       </header>
 
-      {isEmpty ? (
+      {loading ? null : isEmpty ? (
         <div className={styles.empty}>
           <div className={styles.emptyIcon} aria-hidden>
             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

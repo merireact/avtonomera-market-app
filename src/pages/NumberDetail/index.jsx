@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFavorites } from '../../context/FavoritesContext';
-import numbersData from '../../data/numbers.json';
+import { useNumbers } from '../../hooks/useNumbers';
 import { hasSameMiddleDigits, hasSameLetters } from '../../utils/numberUtils';
 import styles from './index.module.scss';
 
@@ -14,8 +14,19 @@ export function NumberDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { numbers: numbersData, loading } = useNumbers();
 
   const item = numbersData.find((n) => String(n.id) === id);
+
+  if (loading) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.notFound}>
+          <p>Загрузка...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!item) {
     return (

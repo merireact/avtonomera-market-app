@@ -36,6 +36,9 @@ export function NumberCard({ item, isFavorite: isFavoriteProp, onToggleFavorite:
         </button>
         <div className={styles.info}>
           <div className={styles.number}>{item.number.replace(/\s/g, '')}</div>
+          {item.status === 'Забронирован' && (
+            <span className={styles.statusBadge}>Забронирован</span>
+          )}
         </div>
       </div>
       <div className={styles.right}>

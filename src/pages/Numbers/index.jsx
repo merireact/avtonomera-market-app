@@ -4,7 +4,7 @@ import { NumberCard } from '../../components/NumberCard';
 import { Input } from '../../components/Input';
 import { Tabs } from '../../components/Tabs';
 import { Filters } from '../../components/Filters';
-import numbersData from '../../data/numbers.json';
+import { useNumbers } from '../../hooks/useNumbers';
 import { getRegionByNumber } from '../../utils/regions';
 import { hasSameMiddleDigits, hasSameLetters } from '../../utils/numberUtils';
 import styles from './index.module.scss';
@@ -19,6 +19,7 @@ const REGION_TABS = [
 
 export function Numbers() {
   const location = useLocation();
+  const { numbers: numbersData, loading: numbersLoading } = useNumbers();
   const stateFilters = location.state?.filters;
   const stateSearch = location.state?.search ?? '';
   const [region, setRegion] = useState(location.state?.region ?? 'all');
@@ -46,6 +47,7 @@ export function Numbers() {
   }, [location.state]);
 
   const filtered = useMemo(() => {
+    if (!numbersData.length) return [];
     return numbersData.filter((item) => {
       const numberRegion = getRegionByNumber(item.number);
       if (region === 'moscow' && numberRegion !== 'Москва') return false;
@@ -60,7 +62,7 @@ export function Numbers() {
       if (filters.sameLetters && !hasSameLetters(item.number)) return false;
       return true;
     });
-  }, [search, filters, region]);
+  }, [numbersData, search, filters, region]);
 
   const visible = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
   const hasMore = visibleCount < filtered.length;
@@ -93,19 +95,25 @@ export function Numbers() {
         </div>
       </header>
       <main className={styles.main}>
-        <ul className={styles.list}>
-          {visible.map((item) => (
-            <li key={item.id}>
-              <NumberCard item={item} />
-            </li>
-          ))}
-        </ul>
-        {hasMore && (
-          <div className={styles.loadMore}>
-            <button type="button" className={styles.loadMoreBtn} onClick={loadMore}>
-              Загрузить ещё
-            </button>
-          </div>
+        {numbersLoading ? (
+          <p className={styles.loading}>Загрузка номеров...</p>
+        ) : (
+          <>
+            <ul className={styles.list}>
+              {visible.map((item) => (
+                <li key={item.id}>
+                  <NumberCard item={item} />
+                </li>
+              ))}
+            </ul>
+            {hasMore && (
+              <div className={styles.loadMore}>
+                <button type="button" className={styles.loadMoreBtn} onClick={loadMore}>
+                  Загрузить ещё
+                </button>
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>

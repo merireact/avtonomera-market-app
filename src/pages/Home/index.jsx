@@ -7,7 +7,7 @@ import { Tabs } from '../../components/Tabs';
 import { FilterModal } from '../../components/FilterModal';
 import { ReviewCard } from '../../components/ReviewCard';
 import { useReviews } from '../../hooks/useReviews';
-import numbersData from '../../data/numbers.json';
+import { useNumbers } from '../../hooks/useNumbers';
 import { getRegionByNumber } from '../../utils/regions';
 import { hasSameMiddleDigits, hasSameLetters } from '../../utils/numberUtils';
 import styles from './index.module.scss';
@@ -26,6 +26,7 @@ function getPriceNum(item) {
 export function Home() {
   const navigate = useNavigate();
   const { reviews: reviewsData, loading: reviewsLoading } = useReviews();
+  const { numbers: numbersData, loading: numbersLoading } = useNumbers();
   const [region, setRegion] = useState('moscow');
   const [search, setSearch] = useState('');
   const [filterModalOpen, setFilterModalOpen] = useState(false);
@@ -40,6 +41,7 @@ export function Home() {
   });
 
   const featuredNumbers = useMemo(() => {
+    if (!numbersData.length) return [];
     let list = numbersData.filter((n) => {
       const numberRegion = getRegionByNumber(n.number);
       if (region === 'moscow' && numberRegion !== 'Москва') return false;
@@ -85,7 +87,7 @@ export function Home() {
       });
     }
     return list.slice(0, 8);
-  }, [region, search, filterValues]);
+  }, [numbersData, region, search, filterValues]);
 
   return (
     <div className={styles.page}>
@@ -129,6 +131,9 @@ export function Home() {
 
         <section className={styles.featured}>
           <h2 className={styles.sectionTitle}>Лучшие номера</h2>
+          {numbersLoading ? (
+            <p className={styles.reviewsLoading}>Загрузка номеров...</p>
+          ) : (
           <ul className={styles.cardList}>
             {featuredNumbers.map((item) => (
               <li key={item.id}>
@@ -136,6 +141,8 @@ export function Home() {
               </li>
             ))}
           </ul>
+          )}
+          {!numbersLoading && (
           <div className={styles.showMore}>
             <Button
               onClick={() =>
@@ -167,6 +174,7 @@ export function Home() {
               Показать больше номеров
             </Button>
           </div>
+          )}
         </section>
 
         <section className={styles.reviews}>

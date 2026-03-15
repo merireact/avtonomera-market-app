@@ -77,6 +77,16 @@ export function Profile() {
       </section>
 
       <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Заказчик</h2>
+        <Link to="/admin" className={styles.link}>
+          <span className={styles.linkLabel}>Добавить номер</span>
+          <span className={styles.linkArrow} aria-hidden>
+            →
+          </span>
+        </Link>
+      </section>
+
+      <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Поддержка</h2>
         <a
           href={SUPPORT_URL}

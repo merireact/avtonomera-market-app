@@ -1,0 +1,115 @@
+.page {
+  min-height: 100vh;
+  padding: 24px 20px 40px;
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  margin: -8px 0 -8px -8px;
+  background: none;
+  border: none;
+  color: #10331d;
+  cursor: pointer;
+}
+
+.title {
+  font-family: 'PT Serif', Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #10331d;
+  margin: 0;
+  flex: 1;
+}
+
+.logoutBtn {
+  flex-shrink: 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: #10331d;
+}
+
+.checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #10331d;
+}
+
+.checkbox input {
+  width: 18px;
+  height: 18px;
+}
+
+.select {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #10331d;
+  background: #fff;
+  border: 1.5px solid rgba(16, 51, 29, 0.25);
+  border-radius: 12px;
+  appearance: auto;
+  cursor: pointer;
+}
+
+.formError {
+  margin: 0;
+  padding: 10px 12px;
+  background: #fde8e8;
+  color: #9b1c1c;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.formSuccess {
+  margin: 0;
+  padding: 10px 12px;
+  background: #e8f5e9;
+  color: #10331d;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.submitBtn {
+  margin-top: 8px;
+}
+
+.loading,
+.error {
+  margin: 0;
+  color: #10331d;
+}
