@@ -84,9 +84,9 @@ export function Profile() {
 
       {isFromTelegram && user && isAdminUser(user) && (
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Заказчик</h2>
+          <h2 className={styles.sectionTitle}>Админ</h2>
           <Link to="/admin" className={styles.link}>
-            <span className={styles.linkLabel}>Добавить номер</span>
+            <span className={styles.linkLabel}>Вход для админа</span>
             <span className={styles.linkArrow} aria-hidden>
               →
             </span>

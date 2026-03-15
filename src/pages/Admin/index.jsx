@@ -121,7 +121,7 @@ export function Admin() {
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1 className={styles.title}>Вход для заказчика</h1>
+          <h1 className={styles.title}>Вход для админа</h1>
         </header>
         <form className={styles.form} onSubmit={handleLogin}>
           {authError && <p className={styles.formError}>{authError.message}</p>}

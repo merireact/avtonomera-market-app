@@ -54,6 +54,20 @@ create policy "Authenticated can update numbers"
   on public.numbers for update
   to authenticated
   using (true);
+
+create policy "Authenticated can delete numbers"
+  on public.numbers for delete
+  to authenticated
+  using (true);
+```
+
+Если таблица `numbers` уже была создана раньше без политики удаления, в **SQL Editor** выполните отдельно:
+
+```sql
+create policy "Authenticated can delete numbers"
+  on public.numbers for delete
+  to authenticated
+  using (true);
 ```
 
 3. В **Project Settings → API** скопируйте **Project URL** и **anon public** key.

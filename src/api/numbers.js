@@ -54,3 +54,33 @@ export async function addNumber(payload) {
   if (error) return { data: null, error };
   return { data: rowToNumber(data), error: null };
 }
+
+export async function updateNumber(id, payload) {
+  if (!supabase) return { data: null, error: new Error('Supabase not configured') };
+  const updates = {};
+  if (payload.status !== undefined) updates.status = String(payload.status).trim();
+  if (payload.price !== undefined) {
+    updates.price = payload.price === '' || String(payload.price).toLowerCase().trim() === 'договорная'
+      ? 'договорная'
+      : (typeof payload.price === 'number' ? String(payload.price) : String(payload.price).trim());
+  }
+  if (Object.keys(updates).length === 0) return { data: null, error: null };
+  const { data, error } = await supabase
+    .from('numbers')
+    .update(updates)
+    .eq('id', Number(id))
+    .select('id, number, city, price, status, vip, same_digits, same_letters, beautiful')
+    .single();
+  if (error) return { data: null, error };
+  return { data: rowToNumber(data), error: null };
+}
+
+export async function deleteNumber(id) {
+  if (!supabase) return { data: null, error: new Error('Supabase not configured') };
+  const { error } = await supabase
+    .from('numbers')
+    .delete()
+    .eq('id', Number(id));
+  if (error) return { data: null, error };
+  return { data: true, error: null };
+}

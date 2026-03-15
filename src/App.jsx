@@ -1,6 +1,7 @@
 import { BrowserRouter, useLocation } from 'react-router-dom';
 import { FavoritesProvider } from './context/FavoritesContext';
 import { TelegramProvider } from './context/TelegramContext';
+import { AuthProvider } from './context/AuthContext';
 import { AppRouter } from './navigation/AppRouter';
 import { BottomTabBar } from './components/BottomTabBar';
 import { ScrollToTop } from './components/ScrollToTop';
@@ -22,9 +23,11 @@ function App() {
   return (
     <BrowserRouter basename={process.env.PUBLIC_URL || ''}>
       <TelegramProvider>
-        <FavoritesProvider>
-          <AppContent />
-        </FavoritesProvider>
+        <AuthProvider>
+          <FavoritesProvider>
+            <AppContent />
+          </FavoritesProvider>
+        </AuthProvider>
       </TelegramProvider>
     </BrowserRouter>
   );

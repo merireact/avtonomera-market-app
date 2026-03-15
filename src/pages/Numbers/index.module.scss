@@ -72,3 +72,78 @@
     background: rgba(16, 51, 29, 0.06);
   }
 }
+
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.editNumber {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #10331d;
+  margin: 0;
+}
+
+.editError {
+  margin: 0;
+  padding: 10px 12px;
+  background: #fde8e8;
+  color: #9b1c1c;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.editLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: #10331d;
+}
+
+.editSelect {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #10331d;
+  background: #fff;
+  border: 1.5px solid rgba(16, 51, 29, 0.25);
+  border-radius: 12px;
+}
+
+.editActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.editDeleteWrap {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(16, 51, 29, 0.12);
+}
+
+.editDeleteBtn {
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #9b1c1c;
+  background: #fde8e8;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  cursor: pointer;
+  width: 100%;
+
+  &:hover:not(:disabled) {
+    background: #fecaca;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
