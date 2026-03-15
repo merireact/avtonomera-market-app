@@ -23,7 +23,6 @@ export function Admin() {
   const [vip, setVip] = useState(false);
   const [sameDigits, setSameDigits] = useState(false);
   const [sameLetters, setSameLetters] = useState(false);
-  const [beautiful, setBeautiful] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -81,7 +80,7 @@ export function Admin() {
       vip,
       sameDigits,
       sameLetters,
-      beautiful,
+      beautiful: false,
     });
     setSubmitLoading(false);
     if (error) {
@@ -94,7 +93,6 @@ export function Admin() {
     setVip(false);
     setSameDigits(false);
     setSameLetters(false);
-    setBeautiful(false);
   };
 
   if (authLoading) {
@@ -162,8 +160,15 @@ export function Admin() {
           <Input value={number} onChange={setNumber} placeholder="Х777СА 777" required />
         </label>
         <label className={styles.label}>
-          Город / регион
-          <Input value={city} onChange={setCity} placeholder="Москва" />
+          Регион
+          <select
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            className={styles.select}
+          >
+            <option value="Москва">Москва</option>
+            <option value="Московская область">Московская область</option>
+          </select>
         </label>
         <label className={styles.label}>
           Цена (число или «договорная»)
@@ -193,10 +198,6 @@ export function Admin() {
           <label className={styles.checkbox}>
             <input type="checkbox" checked={sameLetters} onChange={(e) => setSameLetters(e.target.checked)} />
             <span>Одинаковые буквы</span>
-          </label>
-          <label className={styles.checkbox}>
-            <input type="checkbox" checked={beautiful} onChange={(e) => setBeautiful(e.target.checked)} />
-            <span>Красивый</span>
           </label>
         </div>
 

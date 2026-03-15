@@ -6,6 +6,12 @@ import styles from './index.module.scss';
 const SUPPORT_TELEGRAM = 'nomeramarket_direct';
 const SUPPORT_URL = `https://t.me/${SUPPORT_TELEGRAM}`;
 
+const ADMIN_TELEGRAM_USERNAMES = ['ironchik15', 'merireact'];
+function isAdminUser(user) {
+  if (!user?.username) return false;
+  return ADMIN_TELEGRAM_USERNAMES.includes(user.username.toLowerCase());
+}
+
 function getDisplayName(user) {
   if (!user) return '';
   const parts = [user.first_name, user.last_name].filter(Boolean);
@@ -76,15 +82,17 @@ export function Profile() {
         </Link>
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Заказчик</h2>
-        <Link to="/admin" className={styles.link}>
-          <span className={styles.linkLabel}>Добавить номер</span>
-          <span className={styles.linkArrow} aria-hidden>
-            →
-          </span>
-        </Link>
-      </section>
+      {isFromTelegram && user && isAdminUser(user) && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Заказчик</h2>
+          <Link to="/admin" className={styles.link}>
+            <span className={styles.linkLabel}>Добавить номер</span>
+            <span className={styles.linkArrow} aria-hidden>
+              →
+            </span>
+          </Link>
+        </section>
+      )}
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Поддержка</h2>
