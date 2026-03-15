@@ -205,7 +205,13 @@ insert into public.numbers (id, number, city, price, status, vip, same_digits, s
 (99,'C015EE 550','Московская область','40000','Свободен',false,false,true,false);
 ```
 
-После этого каталог в приложении будет подтягиваться из Supabase. Новые номера заказчик сможет добавлять через админку (страница «Добавить номер» после входа).
+После вставки **обязательно** обновите счётчик id, иначе при добавлении нового номера из приложения появится ошибка `duplicate key value violates unique constraint "numbers_pkey"`. В **SQL Editor** выполните один раз:
+
+```sql
+SELECT setval(pg_get_serial_sequence('public.numbers', 'id'), COALESCE((SELECT MAX(id) FROM public.numbers), 1));
+```
+
+После этого каталог в приложении будет подтягиваться из Supabase, а новые номера можно будет добавлять через админку без ошибки.
 
 ## Аутентификация для админки (номера)
 
