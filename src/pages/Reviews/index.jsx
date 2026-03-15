@@ -4,14 +4,21 @@ import { ReviewCard } from '../../components/ReviewCard';
 import { Button } from '../../components/Button';
 import { Modal } from '../../components/Modal';
 import { useReviews } from '../../hooks/useReviews';
+import { useAuth } from '../../context/AuthContext';
 import { ReviewFormModal } from '../../components/ReviewFormModal';
 import styles from './index.module.scss';
 
 export function Reviews() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { reviews, loading, error, addReview } = useReviews();
+  const { reviews, loading, error, addReview, deleteReview } = useReviews();
+  const { isAdmin } = useAuth();
   const [formOpen, setFormOpen] = useState(Boolean(location.state?.openReview));
+
+  const handleDelete = async (reviewId) => {
+    if (!window.confirm('Удалить этот отзыв?')) return;
+    await deleteReview(reviewId);
+  };
 
   useEffect(() => {
     if (location.state?.openReview) {
@@ -55,7 +62,10 @@ export function Reviews() {
           <ul className={styles.list}>
             {reviews.map((review) => (
               <li key={review.id}>
-                <ReviewCard {...review} />
+                <ReviewCard
+                  {...review}
+                  onDelete={isAdmin ? handleDelete : undefined}
+                />
               </li>
             ))}
           </ul>

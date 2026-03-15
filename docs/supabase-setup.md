@@ -38,6 +38,11 @@ create policy "Anyone can insert review"
   on public.reviews for insert
   with check (true);
 
+create policy "Authenticated can delete reviews"
+  on public.reviews for delete
+  to authenticated
+  using (true);
+
 -- RLS: номера — все читают, только авторизованные добавляют/редактируют
 alter table public.numbers enable row level security;
 
@@ -66,6 +71,15 @@ create policy "Authenticated can delete numbers"
 ```sql
 create policy "Authenticated can delete numbers"
   on public.numbers for delete
+  to authenticated
+  using (true);
+```
+
+Если таблица `reviews` уже была создана без политики удаления отзывов, выполните отдельно:
+
+```sql
+create policy "Authenticated can delete reviews"
+  on public.reviews for delete
   to authenticated
   using (true);
 ```

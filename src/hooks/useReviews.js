@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchReviews, addReview as apiAddReview } from '../api/reviews';
+import { fetchReviews, addReview as apiAddReview, deleteReview as apiDeleteReview } from '../api/reviews';
 import reviewsData from '../data/reviews.json';
 
 export function useReviews() {
@@ -34,5 +34,15 @@ export function useReviews() {
     [load]
   );
 
-  return { reviews, loading, error, refetch: load, addReview };
+  const deleteReview = useCallback(
+    async (reviewId) => {
+      const { error: err } = await apiDeleteReview(reviewId);
+      if (err) return { error: err };
+      await load();
+      return {};
+    },
+    [load]
+  );
+
+  return { reviews, loading, error, refetch: load, addReview, deleteReview };
 }

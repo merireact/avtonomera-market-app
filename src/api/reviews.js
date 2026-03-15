@@ -38,3 +38,13 @@ export async function addReview({ name, rating, text }) {
   if (error) return { data: null, error };
   return { data: rowToReview(data), error: null };
 }
+
+export async function deleteReview(id) {
+  if (!supabase) return { data: null, error: new Error('Supabase not configured') };
+  const { error } = await supabase
+    .from('reviews')
+    .delete()
+    .eq('id', id);
+  if (error) return { data: null, error };
+  return { data: true, error: null };
+}

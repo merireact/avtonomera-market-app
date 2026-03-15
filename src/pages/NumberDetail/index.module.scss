@@ -289,6 +289,26 @@
   border-radius: 12px;
 }
 
+.editCheckboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.editCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #10331d;
+}
+
+.editCheckbox input {
+  width: 18px;
+  height: 18px;
+}
+
 .editActions {
   display: flex;
   gap: 12px;

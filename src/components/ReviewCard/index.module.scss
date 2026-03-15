@@ -17,6 +17,11 @@
   margin-bottom: 14px;
 }
 
+.meta {
+  flex: 1;
+  min-width: 0;
+}
+
 .avatar {
   width: 44px;
   height: 44px;
@@ -31,8 +36,19 @@
   font-weight: 600;
 }
 
-.meta {
-  min-width: 0;
+.deleteBtn {
+  flex-shrink: 0;
+  padding: 8px;
+  background: none;
+  border: none;
+  color: rgba(16, 51, 29, 0.5);
+  cursor: pointer;
+  border-radius: 8px;
+
+  &:hover {
+    color: #9b1c1c;
+    background: #fde8e8;
+  }
 }
 
 .name {

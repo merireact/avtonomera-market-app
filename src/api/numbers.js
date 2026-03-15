@@ -64,6 +64,9 @@ export async function updateNumber(id, payload) {
       ? 'договорная'
       : (typeof payload.price === 'number' ? String(payload.price) : String(payload.price).trim());
   }
+  if (payload.vip !== undefined) updates.vip = Boolean(payload.vip);
+  if (payload.sameDigits !== undefined) updates.same_digits = Boolean(payload.sameDigits);
+  if (payload.sameLetters !== undefined) updates.same_letters = Boolean(payload.sameLetters);
   if (Object.keys(updates).length === 0) return { data: null, error: null };
   const { data, error } = await supabase
     .from('numbers')

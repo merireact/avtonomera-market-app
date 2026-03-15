@@ -25,6 +25,9 @@ export function NumberDetail() {
   const [editOpen, setEditOpen] = useState(false);
   const [editStatus, setEditStatus] = useState('Свободен');
   const [editPrice, setEditPrice] = useState('');
+  const [editVip, setEditVip] = useState(false);
+  const [editSameDigits, setEditSameDigits] = useState(false);
+  const [editSameLetters, setEditSameLetters] = useState(false);
   const [editSaving, setEditSaving] = useState(false);
   const [editDeleting, setEditDeleting] = useState(false);
   const [editError, setEditError] = useState(null);
@@ -35,6 +38,9 @@ export function NumberDetail() {
     if (!item) return;
     setEditStatus(item.status || 'Свободен');
     setEditPrice(typeof item.price === 'string' ? item.price : (item.price != null ? String(item.price) : ''));
+    setEditVip(Boolean(item.vip));
+    setEditSameDigits(Boolean(item.sameDigits));
+    setEditSameLetters(Boolean(item.sameLetters));
     setEditError(null);
     setEditOpen(true);
   }, [item]);
@@ -50,7 +56,13 @@ export function NumberDetail() {
     setEditError(null);
     setEditSaving(true);
     const priceVal = editPrice.trim() === '' || editPrice.trim().toLowerCase() === 'договорная' ? 'договорная' : editPrice.trim();
-    const { error } = await updateNumber(item.id, { status: editStatus.trim(), price: priceVal });
+    const { error } = await updateNumber(item.id, {
+      status: editStatus.trim(),
+      price: priceVal,
+      vip: editVip,
+      sameDigits: editSameDigits,
+      sameLetters: editSameLetters,
+    });
     setEditSaving(false);
     if (error) {
       setEditError(error.message);
@@ -58,7 +70,7 @@ export function NumberDetail() {
     }
     await refetchNumbers();
     closeEdit();
-  }, [item, editStatus, editPrice, refetchNumbers, closeEdit]);
+  }, [item, editStatus, editPrice, editVip, editSameDigits, editSameLetters, refetchNumbers, closeEdit]);
 
   const handleEditDelete = useCallback(async () => {
     if (!item) return;
@@ -216,6 +228,20 @@ export function NumberDetail() {
             Цена (число или «договорная»)
             <Input value={editPrice} onChange={setEditPrice} placeholder="400000 или договорная" />
           </label>
+          <div className={styles.editCheckboxes}>
+            <label className={styles.editCheckbox}>
+              <input type="checkbox" checked={editVip} onChange={(e) => setEditVip(e.target.checked)} />
+              <span>Эксклюзивный (VIP)</span>
+            </label>
+            <label className={styles.editCheckbox}>
+              <input type="checkbox" checked={editSameDigits} onChange={(e) => setEditSameDigits(e.target.checked)} />
+              <span>Одинаковые цифры</span>
+            </label>
+            <label className={styles.editCheckbox}>
+              <input type="checkbox" checked={editSameLetters} onChange={(e) => setEditSameLetters(e.target.checked)} />
+              <span>Одинаковые буквы</span>
+            </label>
+          </div>
           <div className={styles.editActions}>
             <Button type="button" variant="secondary" onClick={closeEdit} disabled={editSaving || editDeleting}>Отмена</Button>
             <Button type="submit" disabled={editSaving || editDeleting}>{editSaving ? 'Сохранение...' : 'Сохранить'}</Button>
