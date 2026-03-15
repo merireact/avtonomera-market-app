@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTelegram } from '../../context/TelegramContext';
 import { useFavorites } from '../../context/FavoritesContext';
+import { useAuth } from '../../context/AuthContext';
 import styles from './index.module.scss';
 
 const SUPPORT_TELEGRAM = 'nomeramarket_direct';
@@ -27,6 +28,7 @@ function getInitials(user) {
 
 export function Profile() {
   const { user, isFromTelegram } = useTelegram();
+  const { isAdmin } = useAuth();
   const { favorites } = useFavorites();
   const favoritesCount = favorites.size;
   const displayName = getDisplayName(user);
@@ -86,7 +88,7 @@ export function Profile() {
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Админ</h2>
           <Link to="/admin" className={styles.link}>
-            <span className={styles.linkLabel}>Вход для админа</span>
+            <span className={styles.linkLabel}>{isAdmin ? 'Добавить номер' : 'Вход для админа'}</span>
             <span className={styles.linkArrow} aria-hidden>
               →
             </span>

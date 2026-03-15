@@ -1,9 +1,11 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFavorites } from '../../context/FavoritesContext';
 import { useAuth } from '../../context/AuthContext';
+import { useTelegram } from '../../context/TelegramContext';
 import { useNumbers } from '../../hooks/useNumbers';
 import { updateNumber, deleteNumber } from '../../api/numbers';
+import { trackNumberView } from '../../api/analytics';
 import { Modal } from '../../components/Modal';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
@@ -21,6 +23,7 @@ export function NumberDetail() {
   const navigate = useNavigate();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { isAdmin } = useAuth();
+  const { user: telegramUser } = useTelegram();
   const { numbers: numbersData, loading, refetch: refetchNumbers } = useNumbers();
   const [editOpen, setEditOpen] = useState(false);
   const [editStatus, setEditStatus] = useState('Свободен');
@@ -33,6 +36,10 @@ export function NumberDetail() {
   const [editError, setEditError] = useState(null);
 
   const item = numbersData.find((n) => String(n.id) === id);
+
+  useEffect(() => {
+    if (item && id) trackNumberView(Number(item.id), telegramUser ?? null);
+  }, [item, id, telegramUser]);
 
   const openEdit = useCallback(() => {
     if (!item) return;

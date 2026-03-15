@@ -64,6 +64,28 @@ create policy "Authenticated can delete numbers"
   on public.numbers for delete
   to authenticated
   using (true);
+
+-- Таблица аналитики (визиты в приложение, просмотры номеров)
+create table if not exists public.analytics_events (
+  id uuid primary key default gen_random_uuid(),
+  event_type text not null,
+  visitor_id uuid not null,
+  telegram_user_id bigint,
+  telegram_username text,
+  number_id int,
+  created_at timestamptz default now()
+);
+
+alter table public.analytics_events enable row level security;
+
+create policy "Anyone can insert analytics events"
+  on public.analytics_events for insert
+  with check (true);
+
+create policy "Authenticated can read analytics"
+  on public.analytics_events for select
+  to authenticated
+  using (true);
 ```
 
 Если таблица `numbers` уже была создана раньше без политики удаления, в **SQL Editor** выполните отдельно:
@@ -80,6 +102,31 @@ create policy "Authenticated can delete numbers"
 ```sql
 create policy "Authenticated can delete reviews"
   on public.reviews for delete
+  to authenticated
+  using (true);
+```
+
+Если таблица `analytics_events` ещё не создана, в **SQL Editor** выполните:
+
+```sql
+create table if not exists public.analytics_events (
+  id uuid primary key default gen_random_uuid(),
+  event_type text not null,
+  visitor_id uuid not null,
+  telegram_user_id bigint,
+  telegram_username text,
+  number_id int,
+  created_at timestamptz default now()
+);
+
+alter table public.analytics_events enable row level security;
+
+create policy "Anyone can insert analytics events"
+  on public.analytics_events for insert
+  with check (true);
+
+create policy "Authenticated can read analytics"
+  on public.analytics_events for select
   to authenticated
   using (true);
 ```

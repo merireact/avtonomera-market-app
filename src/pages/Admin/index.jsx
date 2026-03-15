@@ -4,12 +4,14 @@ import { supabase } from '../../lib/supabase';
 import { addNumber as apiAddNumber } from '../../api/numbers';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
+import { AdminAnalytics } from './AdminAnalytics';
 import styles from './index.module.scss';
 
 const DEFAULT_STATUS = 'Свободен';
 
 export function Admin() {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('add');
   const [authLoading, setAuthLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState('');
@@ -54,11 +56,6 @@ export function Admin() {
       setAuthError(error);
       return;
     }
-  };
-
-  const handleLogout = async () => {
-    if (supabase) await supabase.auth.signOut();
-    setUser(null);
   };
 
   const handleAddNumber = async (e) => {
@@ -147,10 +144,31 @@ export function Admin() {
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 className={styles.title}>Добавить номер</h1>
-        <Button variant="secondary" className={styles.logoutBtn} onClick={handleLogout}>Выйти</Button>
+        <h1 className={styles.title}>
+          {activeTab === 'add' ? 'Добавить номер' : 'Аналитика'}
+        </h1>
       </header>
 
+      <nav className={styles.tabs}>
+        <button
+          type="button"
+          className={activeTab === 'add' ? styles.tabActive : styles.tab}
+          onClick={() => setActiveTab('add')}
+        >
+          Добавить номер
+        </button>
+        <button
+          type="button"
+          className={activeTab === 'analytics' ? styles.tabActive : styles.tab}
+          onClick={() => setActiveTab('analytics')}
+        >
+          Аналитика
+        </button>
+      </nav>
+
+      {activeTab === 'analytics' && <AdminAnalytics />}
+
+      {activeTab === 'add' && (
       <form className={styles.form} onSubmit={handleAddNumber}>
         {submitError && <p className={styles.formError}>{submitError.message}</p>}
         {submitSuccess && <p className={styles.formSuccess}>Номер добавлен в каталог.</p>}
@@ -205,6 +223,7 @@ export function Admin() {
           {submitLoading ? 'Добавляю...' : 'Добавить номер'}
         </Button>
       </form>
+      )}
     </div>
   );
 }

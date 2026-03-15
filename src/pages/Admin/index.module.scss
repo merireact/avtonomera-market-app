@@ -35,10 +35,6 @@
   flex: 1;
 }
 
-.logoutBtn {
-  flex-shrink: 0;
-}
-
 .form {
   display: flex;
   flex-direction: column;
@@ -112,4 +108,136 @@
 .error {
   margin: 0;
   color: #10331d;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.tab,
+.tabActive {
+  flex: 1;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1.5px solid rgba(16, 51, 29, 0.25);
+  background: #fff;
+  color: #10331d;
+}
+
+.tabActive {
+  background: #10331d;
+  color: #fff;
+  border-color: #10331d;
+}
+
+.analytics {
+  margin-top: 0;
+}
+
+.periodRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.periodLabel {
+  font-size: 0.95rem;
+  color: #10331d;
+}
+
+.periodSelect {
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: #10331d;
+  background: #fff;
+  border: 1.5px solid rgba(16, 51, 29, 0.25);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.card {
+  padding: 16px;
+  background: #f5f7f5;
+  border-radius: 12px;
+  border: 1px solid rgba(16, 51, 29, 0.12);
+}
+
+.cardValue {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #10331d;
+  margin-bottom: 4px;
+}
+
+.cardLabel {
+  font-size: 0.85rem;
+  color: #10331d;
+  opacity: 0.85;
+}
+
+.section {
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #10331d;
+  margin: 0 0 12px;
+}
+
+.visitorList,
+.topList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.visitorItem,
+.topItem {
+  padding: 10px 12px;
+  background: #f5f7f5;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  color: #10331d;
+  border: 1px solid rgba(16, 51, 29, 0.08);
+}
+
+.topItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.topNumber {
+  font-weight: 500;
+}
+
+.topViews {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.empty {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #10331d;
+  opacity: 0.8;
 }
