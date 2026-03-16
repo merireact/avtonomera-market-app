@@ -32,3 +32,37 @@ export function hasSameLetters(numberStr) {
   if (!/^[А-ЯA-Zа-яa-z]$/.test(letter1) || !/^[А-ЯA-Zа-яa-z]$/.test(letter2) || !/^[А-ЯA-Zа-яa-z]$/.test(letter3)) return false;
   return letter1 === letter2 && letter2 === letter3;
 }
+
+/**
+ * Возвращает числовое значение трёх цифр в середине номера (1–999) или null.
+ * @param {string} numberStr - строка номера, например "М001РН 790"
+ * @returns {number|null}
+ */
+export function getMiddleDigitsNumber(numberStr) {
+  if (!numberStr || typeof numberStr !== 'string') return null;
+  const part = numberStr.trim().split(/\s+/)[0];
+  if (!part || part.length < 4) return null;
+  const digits = part.slice(1, 4);
+  if (!/^\d{3}$/.test(digits)) return null;
+  return parseInt(digits, 10);
+}
+
+/**
+ * Первая десятка: средние цифры номера 001–010.
+ * @param {string} numberStr - строка номера
+ * @returns {boolean}
+ */
+export function isFirstTen(numberStr) {
+  const n = getMiddleDigitsNumber(numberStr);
+  return n != null && n >= 1 && n <= 10;
+}
+
+/**
+ * Ровные сотни: средние цифры номера 100, 200, 300, … 900.
+ * @param {string} numberStr - строка номера
+ * @returns {boolean}
+ */
+export function isRoundHundreds(numberStr) {
+  const n = getMiddleDigitsNumber(numberStr);
+  return n != null && n >= 100 && n <= 900 && n % 100 === 0;
+}

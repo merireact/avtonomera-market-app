@@ -5,6 +5,8 @@ const FILTER_OPTIONS = [
   { key: 'free', label: 'Свободные' },
   { key: 'sameDigits', label: 'Одинаковые цифры' },
   { key: 'sameLetters', label: 'Одинаковые буквы' },
+  { key: 'firstTen', label: 'Первая десятка' },
+  { key: 'roundHundreds', label: 'Ровные сотни' },
 ];
 
 export function Filters({ selected, onChange }) {

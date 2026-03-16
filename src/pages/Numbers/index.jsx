@@ -5,8 +5,8 @@ import { Input } from '../../components/Input';
 import { Tabs } from '../../components/Tabs';
 import { Filters } from '../../components/Filters';
 import { useNumbers } from '../../hooks/useNumbers';
-import { getRegionByNumber } from '../../utils/regions';
-import { hasSameMiddleDigits, hasSameLetters } from '../../utils/numberUtils';
+import { getRegionForFilter } from '../../utils/regions';
+import { hasSameMiddleDigits, hasSameLetters, isFirstTen, isRoundHundreds } from '../../utils/numberUtils';
 import styles from './index.module.scss';
 
 const PAGE_SIZE = 20;
@@ -30,6 +30,8 @@ export function Numbers() {
     free: stateFilters?.free ?? false,
     sameDigits: stateFilters?.sameDigits ?? false,
     sameLetters: stateFilters?.sameLetters ?? false,
+    firstTen: stateFilters?.firstTen ?? false,
+    roundHundreds: stateFilters?.roundHundreds ?? false,
   });
 
   useEffect(() => {
@@ -42,6 +44,8 @@ export function Numbers() {
         free: fromState.filters.free ?? false,
         sameDigits: fromState.filters.sameDigits ?? false,
         sameLetters: fromState.filters.sameLetters ?? false,
+        firstTen: fromState.filters.firstTen ?? false,
+        roundHundreds: fromState.filters.roundHundreds ?? false,
       });
     }
   }, [location.state]);
@@ -49,7 +53,7 @@ export function Numbers() {
   const filtered = useMemo(() => {
     if (!numbersData.length) return [];
     return numbersData.filter((item) => {
-      const numberRegion = getRegionByNumber(item.number);
+      const numberRegion = getRegionForFilter(item);
       if (region === 'moscow' && numberRegion !== 'Москва') return false;
       if (region === 'region' && numberRegion !== 'Московская область') return false;
       if (search.trim()) {
@@ -60,6 +64,8 @@ export function Numbers() {
       if (filters.free && item.status !== 'Свободен') return false;
       if (filters.sameDigits && !hasSameMiddleDigits(item.number)) return false;
       if (filters.sameLetters && !hasSameLetters(item.number)) return false;
+      if (filters.firstTen && !isFirstTen(item.number)) return false;
+      if (filters.roundHundreds && !isRoundHundreds(item.number)) return false;
       return true;
     });
   }, [numbersData, search, filters, region]);

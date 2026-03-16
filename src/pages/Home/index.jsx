@@ -8,8 +8,8 @@ import { FilterModal } from '../../components/FilterModal';
 import { ReviewCard } from '../../components/ReviewCard';
 import { useReviews } from '../../hooks/useReviews';
 import { useNumbers } from '../../hooks/useNumbers';
-import { getRegionByNumber } from '../../utils/regions';
-import { hasSameMiddleDigits, hasSameLetters } from '../../utils/numberUtils';
+import { getRegionForFilter } from '../../utils/regions';
+import { hasSameMiddleDigits, hasSameLetters, isFirstTen, isRoundHundreds } from '../../utils/numberUtils';
 import styles from './index.module.scss';
 
 const REGION_TABS = [
@@ -38,12 +38,14 @@ export function Home() {
     free: false,
     sameDigits: false,
     sameLetters: false,
+    firstTen: false,
+    roundHundreds: false,
   });
 
   const featuredNumbers = useMemo(() => {
     if (!numbersData.length) return [];
     let list = numbersData.filter((n) => {
-      const numberRegion = getRegionByNumber(n.number);
+      const numberRegion = getRegionForFilter(n);
       if (region === 'moscow' && numberRegion !== 'Москва') return false;
       if (region === 'region' && numberRegion !== 'Московская область') return false;
       if (search.trim()) {
@@ -53,11 +55,13 @@ export function Home() {
       return true;
     });
 
-    const { priceMin, priceMax, priceSort, exclusive, free, sameDigits, sameLetters } = filterValues;
+    const { priceMin, priceMax, priceSort, exclusive, free, sameDigits, sameLetters, firstTen, roundHundreds } = filterValues;
     if (exclusive) list = list.filter((n) => n.vip);
     if (free) list = list.filter((n) => n.status === 'Свободен');
     if (sameDigits) list = list.filter((n) => hasSameMiddleDigits(n.number));
     if (sameLetters) list = list.filter((n) => hasSameLetters(n.number));
+    if (firstTen) list = list.filter((n) => isFirstTen(n.number));
+    if (roundHundreds) list = list.filter((n) => isRoundHundreds(n.number));
     if (priceMin != null || priceMax != null) {
       list = list.filter((n) => {
         const num = getPriceNum(n);
@@ -116,7 +120,7 @@ export function Home() {
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
             </svg>
-            {(filterValues.priceSort || filterValues.priceMin != null || filterValues.priceMax != null || filterValues.exclusive || filterValues.free || filterValues.sameDigits || filterValues.sameLetters) && (
+            {(filterValues.priceSort || filterValues.priceMin != null || filterValues.priceMax != null || filterValues.exclusive || filterValues.free || filterValues.sameDigits || filterValues.sameLetters || filterValues.firstTen || filterValues.roundHundreds) && (
               <span className={styles.filterBadge} aria-hidden />
             )}
           </button>
@@ -155,6 +159,8 @@ export function Home() {
                       free: filterValues.free,
                       sameDigits: filterValues.sameDigits,
                       sameLetters: filterValues.sameLetters,
+                      firstTen: filterValues.firstTen,
+                      roundHundreds: filterValues.roundHundreds,
                     },
                   },
                 })

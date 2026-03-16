@@ -34,3 +34,14 @@ export function getRegionByNumber(numberStr) {
   if (MOSCOW_OBLAST_SERIES.includes(series)) return 'Московская область';
   return null;
 }
+
+/**
+ * Регион для фильтрации: учитывает сохранённый city (при добавлении номера)
+ * и при необходимости — код региона из строки номера.
+ * @param {{ number: string, city?: string }} item - объект номера с полями number и city
+ * @returns {'Москва'|'Московская область'|null}
+ */
+export function getRegionForFilter(item) {
+  if (item?.city === 'Москва' || item?.city === 'Московская область') return item.city;
+  return getRegionByNumber(item?.number ?? '');
+}

@@ -14,6 +14,8 @@ const CHECKBOX_FILTERS = [
   { key: 'free', label: 'Свободные' },
   { key: 'sameDigits', label: 'Одинаковые цифры' },
   { key: 'sameLetters', label: 'Одинаковые буквы' },
+  { key: 'firstTen', label: 'Первая десятка' },
+  { key: 'roundHundreds', label: 'Ровные сотни' },
 ];
 
 export function FilterModal({ open, onClose, value, onChange }) {
@@ -24,6 +26,8 @@ export function FilterModal({ open, onClose, value, onChange }) {
   const [free, setFree] = useState(value?.free ?? false);
   const [sameDigits, setSameDigits] = useState(value?.sameDigits ?? false);
   const [sameLetters, setSameLetters] = useState(value?.sameLetters ?? false);
+  const [firstTen, setFirstTen] = useState(value?.firstTen ?? false);
+  const [roundHundreds, setRoundHundreds] = useState(value?.roundHundreds ?? false);
 
   useEffect(() => {
     if (open) {
@@ -34,8 +38,10 @@ export function FilterModal({ open, onClose, value, onChange }) {
       setFree(value?.free ?? false);
       setSameDigits(value?.sameDigits ?? false);
       setSameLetters(value?.sameLetters ?? false);
+      setFirstTen(value?.firstTen ?? false);
+      setRoundHundreds(value?.roundHundreds ?? false);
     }
-  }, [open, value?.priceSort, value?.priceMin, value?.priceMax, value?.exclusive, value?.free, value?.sameDigits, value?.sameLetters]);
+  }, [open, value?.priceSort, value?.priceMin, value?.priceMax, value?.exclusive, value?.free, value?.sameDigits, value?.sameLetters, value?.firstTen, value?.roundHundreds]);
 
   const handleApply = () => {
     const numMin = minPrice === '' ? undefined : Number(minPrice);
@@ -48,6 +54,8 @@ export function FilterModal({ open, onClose, value, onChange }) {
       free,
       sameDigits,
       sameLetters,
+      firstTen,
+      roundHundreds,
     });
     onClose?.();
   };
@@ -60,6 +68,8 @@ export function FilterModal({ open, onClose, value, onChange }) {
     setFree(false);
     setSameDigits(false);
     setSameLetters(false);
+    setFirstTen(false);
+    setRoundHundreds(false);
     onChange?.({
       priceSort: undefined,
       priceMin: undefined,
@@ -68,6 +78,8 @@ export function FilterModal({ open, onClose, value, onChange }) {
       free: false,
       sameDigits: false,
       sameLetters: false,
+      firstTen: false,
+      roundHundreds: false,
     });
     onClose?.();
   };
@@ -98,8 +110,8 @@ export function FilterModal({ open, onClose, value, onChange }) {
           <legend className={styles.legend}>Параметры</legend>
           <div className={styles.checkboxGroup}>
             {CHECKBOX_FILTERS.map(({ key, label }) => {
-              const checked = key === 'exclusive' ? exclusive : key === 'free' ? free : key === 'sameDigits' ? sameDigits : sameLetters;
-              const setChecked = key === 'exclusive' ? setExclusive : key === 'free' ? setFree : key === 'sameDigits' ? setSameDigits : setSameLetters;
+              const checked = key === 'exclusive' ? exclusive : key === 'free' ? free : key === 'sameDigits' ? sameDigits : key === 'sameLetters' ? sameLetters : key === 'firstTen' ? firstTen : roundHundreds;
+              const setChecked = key === 'exclusive' ? setExclusive : key === 'free' ? setFree : key === 'sameDigits' ? setSameDigits : key === 'sameLetters' ? setSameLetters : key === 'firstTen' ? setFirstTen : setRoundHundreds;
               return (
                 <label key={key} className={styles.checkboxLabel}>
                   <input
