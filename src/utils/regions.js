@@ -35,13 +35,9 @@ export function getRegionByNumber(numberStr) {
   return null;
 }
 
-/**
- * Регион для фильтрации: учитывает сохранённый city (при добавлении номера)
- * и при необходимости — код региона из строки номера.
- * @param {{ number: string, city?: string }} item - объект номера с полями number и city
- * @returns {'Москва'|'Московская область'|null}
- */
 export function getRegionForFilter(item) {
+  const numberRegion = getRegionByNumber(item?.number ?? '');
+  if (numberRegion) return numberRegion;
   if (item?.city === 'Москва' || item?.city === 'Московская область') return item.city;
-  return getRegionByNumber(item?.number ?? '');
+  return null;
 }
