@@ -5,6 +5,8 @@ import { addNumber as apiAddNumber } from '../../api/numbers';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { AdminAnalytics } from './AdminAnalytics';
+import { getRegionByNumber } from '../../utils/regions';
+import { hasSameMiddleDigits, hasSameLetters, isFirstTen, isRoundHundreds } from '../../utils/numberUtils';
 import styles from './index.module.scss';
 
 const DEFAULT_STATUS = 'Свободен';
@@ -25,9 +27,22 @@ export function Admin() {
   const [vip, setVip] = useState(false);
   const [sameDigits, setSameDigits] = useState(false);
   const [sameLetters, setSameLetters] = useState(false);
+  const [firstTen, setFirstTen] = useState(false);
+  const [roundHundreds, setRoundHundreds] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  useEffect(() => {
+    if (number.trim()) {
+      setSameDigits(hasSameMiddleDigits(number));
+      setSameLetters(hasSameLetters(number));
+      setFirstTen(isFirstTen(number));
+      setRoundHundreds(isRoundHundreds(number));
+      const autoRegion = getRegionByNumber(number);
+      if (autoRegion) setCity(autoRegion);
+    }
+  }, [number]);
 
   useEffect(() => {
     if (!supabase) {
@@ -77,6 +92,8 @@ export function Admin() {
       vip,
       sameDigits,
       sameLetters,
+      firstTen,
+      roundHundreds,
       beautiful: false,
     });
     setSubmitLoading(false);
@@ -90,6 +107,8 @@ export function Admin() {
     setVip(false);
     setSameDigits(false);
     setSameLetters(false);
+    setFirstTen(false);
+    setRoundHundreds(false);
   };
 
   if (authLoading) {
@@ -217,6 +236,14 @@ export function Admin() {
             <input type="checkbox" checked={sameLetters} onChange={(e) => setSameLetters(e.target.checked)} />
             <span>Одинаковые буквы</span>
           </label>
+          <label className={styles.checkbox}>
+            <input type="checkbox" checked={firstTen} onChange={(e) => setFirstTen(e.target.checked)} />
+            <span>Первая десятка</span>
+          </label>
+          <label className={styles.checkbox}>
+            <input type="checkbox" checked={roundHundreds} onChange={(e) => setRoundHundreds(e.target.checked)} />
+            <span>Ровные сотни</span>
+          </label>
         </div>
 
         <Button type="submit" className={styles.submitBtn} disabled={submitLoading}>
@@ -227,3 +254,4 @@ export function Admin() {
     </div>
   );
 }
+
