@@ -383,8 +383,9 @@ begin
   for rec in
     select id, telegram_user_id
     from public.plate_alerts
-    where plate_key = key
-      and notified_at is null
+    where notified_at is null
+      and length(plate_key) >= 2
+      and strpos(key, plate_key) > 0
   loop
     perform net.http_post(
       url := 'https://api.telegram.org/bot' || token || '/sendMessage',

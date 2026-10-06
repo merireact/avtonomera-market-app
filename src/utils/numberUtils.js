@@ -111,6 +111,30 @@ export function isFullPlate(numberStr) {
 }
 
 /**
+ * Запрос номера: полный госномер или его часть из букв и цифр.
+ * «777» и «А777АА» достаточны, одна буква или цифра — нет.
+ * @param {string} numberStr
+ * @returns {boolean}
+ */
+export function isPlateRequest(numberStr) {
+  return plateKey(numberStr).length >= 2;
+}
+
+/**
+ * Фрагмент запроса входит в номер. Та же логика, что strpos в notify_plate_alerts.
+ * «777» и «А777АА» подходят к «А777АА 77».
+ * @param {string} request
+ * @param {string} numberStr
+ * @returns {boolean}
+ */
+export function matchesPlateRequest(request, numberStr) {
+  const query = plateKey(request);
+  const key = plateKey(numberStr);
+  if (query.length < 2 || !key) return false;
+  return key.includes(query);
+}
+
+/**
  * Три буквы номера подряд: первая и две после цифр. «А831АА 777» → «ААА».
  * @param {string} numberStr
  * @returns {string}

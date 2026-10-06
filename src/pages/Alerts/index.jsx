@@ -5,7 +5,7 @@ import { useNumbers } from '../../hooks/useNumbers';
 import { createPlateAlert, deletePlateAlert, fetchPlateAlerts } from '../../api/alerts';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
-import { isFullPlate, plateKey } from '../../utils/numberUtils';
+import { isFullPlate, isPlateRequest, plateKey } from '../../utils/numberUtils';
 import styles from './index.module.scss';
 
 function formatPlateInput(value) {
@@ -53,13 +53,13 @@ export function Alerts() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError(null);
-    if (!user?.id) {
-      setFormError('Откройте из Telegram.');
+    const value = formatPlateInput(plate);
+    if (!isPlateRequest(value)) {
+      setFormError('Укажите номер или его часть, например 777 или А777АА.');
       return;
     }
-    const value = formatPlateInput(plate);
-    if (!isFullPlate(value)) {
-      setFormError('Укажите номер целиком, например А777АА 77.');
+    if (!user?.id) {
+      setFormError('Откройте из Telegram.');
       return;
     }
     if (existingFree) {
@@ -105,7 +105,7 @@ export function Alerts() {
       </header>
 
       <p className={styles.lead}>
-        Введите номер. Запрос увидят администраторы.
+        Введите номер или его часть. Запрос увидят администраторы.
       </p>
 
       <form className={styles.form} onSubmit={handleSubmit}>
@@ -114,7 +114,7 @@ export function Alerts() {
           <Input
             value={plate}
             onChange={setPlate}
-            placeholder="А777АА 77"
+            placeholder="777 или А777АА"
           />
         </label>
         {existingFree && (

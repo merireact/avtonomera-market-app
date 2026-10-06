@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { plateKey } from '../utils/numberUtils';
+import { isPlateRequest, plateKey } from '../utils/numberUtils';
 
 function rowToAlert(row) {
   return {
@@ -28,6 +28,9 @@ export async function fetchPlateAlerts(telegramUserId) {
 export async function createPlateAlert({ telegramUserId, telegramUsername, plate }) {
   if (!supabase) return { data: null, error: new Error('Supabase not configured') };
   const trimmed = String(plate || '').trim();
+  if (!isPlateRequest(trimmed)) {
+    return { data: null, error: new Error('Укажите номер или его часть.') };
+  }
   const { data, error } = await supabase
     .from('plate_alerts')
     .insert({
