@@ -6,7 +6,8 @@ import { Tabs } from '../../components/Tabs';
 import { Filters } from '../../components/Filters';
 import { useNumbers } from '../../hooks/useNumbers';
 import { getRegionForFilter } from '../../utils/regions';
-import { hasSameMiddleDigits, hasSameLetters, isFirstTen, isRoundHundreds } from '../../utils/numberUtils';
+import { matchesNumberSearch } from '../../utils/numberUtils';
+import { applyNumberFilters, createEmptyFilters, POSITION_KEYS } from '../../utils/numberFilters';
 import styles from './index.module.scss';
 
 const PAGE_SIZE = 20;
@@ -17,6 +18,19 @@ const REGION_TABS = [
   { value: 'region', label: 'Московская область' },
 ];
 
+function filtersFromState(stateFilters) {
+  const next = createEmptyFilters();
+  if (!stateFilters) return next;
+  POSITION_KEYS.forEach((key) => {
+    next[key] = Boolean(stateFilters[key]);
+  });
+  if (stateFilters.exclusive) next.vip = true;
+  next.priceSort = stateFilters.priceSort;
+  next.priceMin = stateFilters.priceMin;
+  next.priceMax = stateFilters.priceMax;
+  return next;
+}
+
 export function Numbers() {
   const location = useLocation();
   const { numbers: numbersData, loading: numbersLoading } = useNumbers();
@@ -25,49 +39,26 @@ export function Numbers() {
   const [region, setRegion] = useState(location.state?.region ?? 'all');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [search, setSearch] = useState(typeof stateSearch === 'string' ? stateSearch : '');
-  const [filters, setFilters] = useState({
-    vip: stateFilters?.exclusive ?? false,
-    free: stateFilters?.free ?? false,
-    sameDigits: stateFilters?.sameDigits ?? false,
-    sameLetters: stateFilters?.sameLetters ?? false,
-    firstTen: stateFilters?.firstTen ?? false,
-    roundHundreds: stateFilters?.roundHundreds ?? false,
-  });
+  const [filters, setFilters] = useState(() => filtersFromState(stateFilters));
 
   useEffect(() => {
     const fromState = location.state;
-    if (fromState?.region === 'moscow' || fromState?.region === 'region') setRegion(fromState.region);
-    if (typeof fromState?.search === 'string') setSearch(fromState.search);
-    if (fromState?.filters) {
-      setFilters({
-        vip: fromState.filters.exclusive ?? false,
-        free: fromState.filters.free ?? false,
-        sameDigits: fromState.filters.sameDigits ?? false,
-        sameLetters: fromState.filters.sameLetters ?? false,
-        firstTen: fromState.filters.firstTen ?? false,
-        roundHundreds: fromState.filters.roundHundreds ?? false,
-      });
+    if (fromState?.region === 'moscow' || fromState?.region === 'region' || fromState?.region === 'all') {
+      setRegion(fromState.region);
     }
+    if (typeof fromState?.search === 'string') setSearch(fromState.search);
+    if (fromState?.filters) setFilters(filtersFromState(fromState.filters));
   }, [location.state]);
 
   const filtered = useMemo(() => {
-    if (!numbersData.length) return [];
-    return numbersData.filter((item) => {
+    const list = numbersData.filter((item) => {
       const numberRegion = getRegionForFilter(item);
       if (region === 'moscow' && numberRegion !== 'Москва') return false;
       if (region === 'region' && numberRegion !== 'Московская область') return false;
-      if (search.trim()) {
-        const q = search.trim().toLowerCase();
-        if (!item.number.toLowerCase().includes(q) && !item.city.toLowerCase().includes(q)) return false;
-      }
-      if (filters.vip && !item.vip) return false;
-      if (filters.free && item.status !== 'Свободен') return false;
-      if (filters.sameDigits && !hasSameMiddleDigits(item.number)) return false;
-      if (filters.sameLetters && !hasSameLetters(item.number)) return false;
-      if (filters.firstTen && !isFirstTen(item.number)) return false;
-      if (filters.roundHundreds && !isRoundHundreds(item.number)) return false;
+      if (search.trim() && !matchesNumberSearch(item.number, item.city, search)) return false;
       return true;
     });
+    return applyNumberFilters(list, filters);
   }, [numbersData, search, filters, region]);
 
   const visible = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
@@ -89,7 +80,7 @@ export function Numbers() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <h1 className={styles.title}>Все номера</h1>
+        <h1 className={styles.title}>Номера</h1>
         <div className={styles.tabsWrap}>
           <Tabs tabs={REGION_TABS} activeValue={region} onChange={setRegion} />
         </div>

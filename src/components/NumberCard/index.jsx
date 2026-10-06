@@ -6,7 +6,7 @@ export function NumberCard({ item, isFavorite: isFavoriteProp, onToggleFavorite:
   const navigate = useNavigate();
   const { isFavorite: isFavoriteCtx, toggleFavorite: toggleFavoriteCtx } = useFavorites();
   const isFavorite = isFavoriteProp ?? isFavoriteCtx(item.id);
-  const onToggleFavorite = onToggleFavoriteProp ?? (() => toggleFavoriteCtx(item.id));
+  const onToggleFavorite = onToggleFavoriteProp ?? (() => toggleFavoriteCtx(item.id, item.price));
   const priceFormatted =
     typeof item.price === 'string'
       ? item.price

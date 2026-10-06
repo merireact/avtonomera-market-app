@@ -1,0 +1,25 @@
+name: Sync autonomera catalog
+
+on:
+  schedule:
+    # 09:00 по Самаре (UTC+4)
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull seller listings into the mini app
+        env:
+          SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
+          SYNC_CRON_SECRET: ${{ secrets.SYNC_CRON_SECRET }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SYNC_CRON_SECRET" ]; then
+            echo "Add REACT_APP_SUPABASE_URL and SYNC_CRON_SECRET repository secrets, and the same SYNC_CRON_SECRET in Supabase function secrets."
+            exit 1
+          fi
+          curl --fail-with-body -sS -X POST "$SUPABASE_URL/functions/v1/sync-autonomera" \
+            -H "Content-Type: application/json" \
+            -H "x-sync-secret: $SYNC_CRON_SECRET" \
+            -d '{"force":true}'

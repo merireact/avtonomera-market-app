@@ -66,3 +66,87 @@ export function isRoundHundreds(numberStr) {
   const n = getMiddleDigitsNumber(numberStr);
   return n != null && n >= 100 && n <= 900 && n % 100 === 0;
 }
+
+/** Латинские и похожие кириллические буквы госномера приводим к одному виду. */
+const PLATE_LETTER_TO_LATIN = {
+  а: 'a', a: 'a',
+  в: 'b', b: 'b',
+  е: 'e', e: 'e',
+  к: 'k', k: 'k',
+  м: 'm', m: 'm',
+  н: 'h', h: 'h',
+  о: 'o', o: 'o',
+  р: 'p', p: 'p',
+  с: 'c', c: 'c',
+  т: 't', t: 't',
+  у: 'y', y: 'y',
+  х: 'x', x: 'x',
+};
+
+function normalizePlateChars(str) {
+  return String(str || '')
+    .toLowerCase()
+    .split('')
+    .map((ch) => PLATE_LETTER_TO_LATIN[ch] ?? ch)
+    .join('');
+}
+
+/**
+ * Ключ номера для сравнения: без пробелов, буквы в одной раскладке.
+ * «А777АА 77» и «a777aa77» дают один ключ. Та же логика в SQL-функции plate_key.
+ * @param {string} numberStr
+ * @returns {string}
+ */
+export function plateKey(numberStr) {
+  return normalizePlateChars(numberStr).replace(/[^a-z0-9]/g, '');
+}
+
+/**
+ * Полный госномер: буква, три цифры, две буквы, код региона из 2–3 цифр.
+ * @param {string} numberStr
+ * @returns {boolean}
+ */
+export function isFullPlate(numberStr) {
+  return /^[a-z]\d{3}[a-z]{2}\d{2,3}$/.test(plateKey(numberStr));
+}
+
+/**
+ * Три буквы номера подряд: первая и две после цифр. «А831АА 777» → «ААА».
+ * @param {string} numberStr
+ * @returns {string}
+ */
+export function getPlateLetters(numberStr) {
+  if (!numberStr || typeof numberStr !== 'string') return '';
+  const part = numberStr.trim().split(/\s+/)[0] || '';
+  if (part.length >= 6 && /^\d{3}$/.test(part.slice(1, 4))) {
+    return part[0] + part[4] + part[5];
+  }
+  return part.replace(/\d/g, '');
+}
+
+/**
+ * Поиск по номеру и городу.
+ * Запрос из одних букв сравнивается с буквами номера, а не со всей строкой:
+ * «ААА» находит «А831АА 777», хотя в строке буквы разделены цифрами.
+ * @param {string} numberStr
+ * @param {string} city
+ * @param {string} query
+ * @returns {boolean}
+ */
+export function matchesNumberSearch(numberStr, city, query) {
+  const raw = (query || '').trim();
+  if (!raw) return true;
+
+  const compact = normalizePlateChars(raw).replace(/[\s.\-_*]+/g, '');
+  // В номере три буквы. Короткий буквенный запрос ищет их, а не город:
+  // «ААА» → «А831АА», «Москва» остаётся поиском по названию города.
+  if (compact.length > 0 && compact.length <= 3 && /^[a-z]+$/.test(compact)) {
+    const letters = normalizePlateChars(getPlateLetters(numberStr));
+    return letters.includes(compact);
+  }
+
+  const q = normalizePlateChars(raw);
+  const numberNorm = normalizePlateChars(numberStr);
+  const cityNorm = normalizePlateChars(city);
+  return numberNorm.includes(q) || cityNorm.includes(q);
+}

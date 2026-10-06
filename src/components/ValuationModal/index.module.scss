@@ -1,0 +1,38 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.text {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #10331d;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.contactBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 14px 20px;
+  background: #10331d;
+  color: #eee4d1;
+  border-radius: 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    background: #0d2818;
+  }
+}

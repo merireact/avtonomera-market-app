@@ -1,0 +1,10 @@
+project_id = "avtonomera-market-app"
+
+[functions.sync-favorite]
+verify_jwt = false
+
+[functions.notify-price-drop]
+verify_jwt = true
+
+[functions.sync-autonomera]
+verify_jwt = false

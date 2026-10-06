@@ -274,6 +274,168 @@ SELECT setval(pg_get_serial_sequence('public.numbers', 'id'), COALESCE((SELECT M
 
 После этого каталог в приложении будет подтягиваться из Supabase, а новые номера можно будет добавлять через админку без ошибки.
 
+## Заявки «Жду номер»
+
+Человек оставляет номер, которого нет в каталоге. Когда этот номер добавляют со статусом «Свободен» (или бронь снимают), триггер в базе сам отправляет сообщение от бота в Telegram. Токен бота в приложение не попадает: он лежит в Vault, а пишет в Telegram только функция базы.
+
+В **SQL Editor** выполните:
+
+```sql
+create extension if not exists pg_net;
+
+create table if not exists public.plate_alerts (
+  id uuid primary key default gen_random_uuid(),
+  telegram_user_id bigint not null,
+  telegram_username text,
+  plate text not null,
+  plate_key text not null,
+  created_at timestamptz default now(),
+  notified_at timestamptz
+);
+
+create unique index if not exists plate_alerts_active_unique
+  on public.plate_alerts (telegram_user_id, plate_key)
+  where notified_at is null;
+
+create index if not exists plate_alerts_plate_key_idx
+  on public.plate_alerts (plate_key)
+  where notified_at is null;
+
+alter table public.plate_alerts enable row level security;
+
+create policy "Anyone can insert plate alerts"
+  on public.plate_alerts for insert
+  with check (telegram_user_id is not null and length(plate_key) > 0);
+
+create policy "Anyone can read plate alerts"
+  on public.plate_alerts for select
+  using (true);
+
+create policy "Anyone can delete plate alerts"
+  on public.plate_alerts for delete
+  using (true);
+
+-- Тот же ключ, что plateKey() в src/utils/numberUtils.js: без пробелов, буквы в латинице.
+create or replace function public.plate_key(raw text)
+returns text
+language sql
+immutable
+as $$
+  select translate(
+    lower(regexp_replace(coalesce(raw, ''), '[^0-9A-Za-zА-Яа-яЁё]', '', 'g')),
+    'авекмнорстух',
+    'abekmhopctyx'
+  );
+$$;
+
+create or replace function public.notify_plate_alerts()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  token text;
+  key text;
+  rec record;
+  price_text text;
+  msg text;
+begin
+  if NEW.status is distinct from 'Свободен' then
+    return NEW;
+  end if;
+
+  if TG_OP = 'UPDATE'
+     and OLD.status = 'Свободен'
+     and public.plate_key(OLD.number) = public.plate_key(NEW.number) then
+    return NEW;
+  end if;
+
+  key := public.plate_key(NEW.number);
+  if key is null or key = '' then
+    return NEW;
+  end if;
+
+  select decrypted_secret into token
+  from vault.decrypted_secrets
+  where name = 'telegram_bot_token'
+  limit 1;
+
+  if token is null or token = '' then
+    return NEW;
+  end if;
+
+  if NEW.price is null or btrim(NEW.price) = '' or lower(btrim(NEW.price)) = 'договорная' then
+    price_text := 'договорная';
+  elsif btrim(NEW.price) ~ '^\d+$' then
+    price_text := trim(reverse(regexp_replace(reverse(btrim(NEW.price)), '(\d{3})', '\1 ', 'g'))) || ' ₽';
+  else
+    price_text := btrim(NEW.price);
+  end if;
+
+  msg := format(
+    E'Появился номер, который вы ждали.\n\n%s\n%s\n%s\n\nОткройте каталог в боте, чтобы посмотреть его.',
+    NEW.number,
+    NEW.city,
+    price_text
+  );
+
+  for rec in
+    select id, telegram_user_id
+    from public.plate_alerts
+    where plate_key = key
+      and notified_at is null
+  loop
+    perform net.http_post(
+      url := 'https://api.telegram.org/bot' || token || '/sendMessage',
+      headers := '{"Content-Type": "application/json"}'::jsonb,
+      body := jsonb_build_object(
+        'chat_id', rec.telegram_user_id,
+        'text', msg
+      )
+    );
+
+    update public.plate_alerts
+      set notified_at = now()
+      where id = rec.id;
+  end loop;
+
+  return NEW;
+exception
+  when others then
+    return NEW;
+end;
+$$;
+
+drop trigger if exists numbers_notify_plate_alerts on public.numbers;
+
+create trigger numbers_notify_plate_alerts
+  after insert or update of number, status
+  on public.numbers
+  for each row
+  execute function public.notify_plate_alerts();
+```
+
+Токен бота (тот, что выдаёт BotFather) сохраните отдельно, не в коде приложения:
+
+```sql
+select vault.create_secret('123456:ABC-ваш-токен', 'telegram_bot_token', 'Telegram bot token for plate alerts');
+```
+
+Сообщение дойдёт только тем, кто хотя бы раз открыл бота и нажал Start. Иначе Telegram отклоняет отправку в личный чат.
+
+## Фильтры «Авто» и «Иные»
+
+Это отдельные отметки, как «Одинаковые цифры». Сами номера под них не попадают: галочку ставит админ при добавлении или в карточке номера. Пока галочек нет, фильтр пустой.
+
+В **SQL Editor** выполните:
+
+```sql
+alter table public.numbers
+  add column if not exists is_auto boolean not null default false,
+  add column if not exists is_other boolean not null default false;
+```
+
 ## Аутентификация для админки (номера)
 
 Чтобы заказчик мог добавлять номера через приложение:
@@ -283,6 +445,32 @@ SELECT setval(pg_get_serial_sequence('public.numbers', 'id'), COALESCE((SELECT M
 3. В **Authentication → URL Configuration** добавьте в **Redirect URLs** ваш домен приложения (например `https://merireact.github.io/avtonomera-market-app` и URL Web App в Telegram, если отличается).
 
 После входа на странице `/admin` заказчик сможет добавлять новые номера.
+
+## Уведомления бота о снижении цены в избранном
+
+Когда человек открывает приложение из Telegram и добавляет номер в избранное, приложение записывает это в `favorite_watches`. Если числовая цена этого номера становится меньше, триггер сам отправляет сообщение от бота. Токен тот же, что для заявок «Жду номер» (`telegram_bot_token` в Vault). Повышение цены и смена на «договорная» сообщение не вызывают.
+
+В **SQL Editor** выполните содержимое `supabase/migrations/20261006193000_favorite_watches.sql`.
+
+Сообщение дойдёт только тем, кто хотя бы раз открыл бота и нажал Start.
+
+## Синхронизация с autonomera777
+
+Каталог мини-приложения повторяет активные объявления продавца [Avtonomera Market](https://autonomera777.ru/user?user_id=55597). Пароль от сайта не нужен: читается публичная страница.
+
+1. В **SQL Editor** выполните миграцию `supabase/migrations/20261006223000_autonomera_sync.sql`.
+2. Задеплойте функцию и секрет расписания:
+
+```bash
+supabase login
+supabase link --project-ref bqdfazpbbioigebpargd
+supabase secrets set SYNC_CRON_SECRET=<случайная-строка>
+supabase functions deploy sync-autonomera --no-verify-jwt
+```
+
+3. В **GitHub repo → Settings → Secrets** добавьте `SYNC_CRON_SECRET` с тем же значением. Workflow `.github/workflows/sync-autonomera.yml` вызывает синхронизацию каждый день в 9:00 (UTC+4).
+
+Пока функцию не задеплоили, кнопка «Обновить с сайта сейчас» в админке вернёт ошибку. После деплоя приложение само запрашивает обновление при открытии, если с прошлой успешной синхронизации прошёл час.
 
 ## Деплой (GitHub Pages)
 

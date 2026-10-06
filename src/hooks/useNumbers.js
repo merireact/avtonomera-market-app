@@ -24,5 +24,11 @@ export function useNumbers() {
     load();
   }, [load]);
 
+  useEffect(() => {
+    const onSync = () => load();
+    window.addEventListener('catalog-synced', onSync);
+    return () => window.removeEventListener('catalog-synced', onSync);
+  }, [load]);
+
   return { numbers, loading, error, refetch: load };
 }

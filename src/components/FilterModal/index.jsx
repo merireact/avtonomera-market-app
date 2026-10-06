@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Modal } from '../Modal';
 import { Button } from '../Button';
 import { Input } from '../Input';
+import { FILTER_OPTIONS, POSITION_KEYS, createEmptyFilters } from '../../utils/numberFilters';
 import styles from './index.module.scss';
 
 const SORT_OPTIONS = [
@@ -9,78 +10,44 @@ const SORT_OPTIONS = [
   { value: 'desc', label: 'Сначала дорогие' },
 ];
 
-const CHECKBOX_FILTERS = [
-  { key: 'exclusive', label: 'Эксклюзивный' },
-  { key: 'free', label: 'Свободные' },
-  { key: 'sameDigits', label: 'Одинаковые цифры' },
-  { key: 'sameLetters', label: 'Одинаковые буквы' },
-  { key: 'firstTen', label: 'Первая десятка' },
-  { key: 'roundHundreds', label: 'Ровные сотни' },
-];
+function positionsFromValue(value) {
+  return Object.fromEntries(POSITION_KEYS.map((key) => [key, Boolean(value?.[key])]));
+}
 
 export function FilterModal({ open, onClose, value, onChange }) {
   const [sort, setSort] = useState(value?.priceSort ?? '');
   const [minPrice, setMinPrice] = useState(value?.priceMin ?? '');
   const [maxPrice, setMaxPrice] = useState(value?.priceMax ?? '');
-  const [exclusive, setExclusive] = useState(value?.exclusive ?? false);
-  const [free, setFree] = useState(value?.free ?? false);
-  const [sameDigits, setSameDigits] = useState(value?.sameDigits ?? false);
-  const [sameLetters, setSameLetters] = useState(value?.sameLetters ?? false);
-  const [firstTen, setFirstTen] = useState(value?.firstTen ?? false);
-  const [roundHundreds, setRoundHundreds] = useState(value?.roundHundreds ?? false);
+  const [positions, setPositions] = useState(() => positionsFromValue(value));
 
   useEffect(() => {
-    if (open) {
-      setSort(value?.priceSort ?? '');
-      setMinPrice(value?.priceMin != null ? String(value.priceMin) : '');
-      setMaxPrice(value?.priceMax != null ? String(value.priceMax) : '');
-      setExclusive(value?.exclusive ?? false);
-      setFree(value?.free ?? false);
-      setSameDigits(value?.sameDigits ?? false);
-      setSameLetters(value?.sameLetters ?? false);
-      setFirstTen(value?.firstTen ?? false);
-      setRoundHundreds(value?.roundHundreds ?? false);
-    }
-  }, [open, value?.priceSort, value?.priceMin, value?.priceMax, value?.exclusive, value?.free, value?.sameDigits, value?.sameLetters, value?.firstTen, value?.roundHundreds]);
+    if (!open) return;
+    setSort(value?.priceSort ?? '');
+    setMinPrice(value?.priceMin != null ? String(value.priceMin) : '');
+    setMaxPrice(value?.priceMax != null ? String(value.priceMax) : '');
+    setPositions(positionsFromValue(value));
+  }, [open, value]);
 
   const handleApply = () => {
     const numMin = minPrice === '' ? undefined : Number(minPrice);
     const numMax = maxPrice === '' ? undefined : Number(maxPrice);
     onChange?.({
+      ...createEmptyFilters(),
+      ...positions,
       priceSort: sort || undefined,
-      priceMin: numMin,
-      priceMax: numMax,
-      exclusive,
-      free,
-      sameDigits,
-      sameLetters,
-      firstTen,
-      roundHundreds,
+      priceMin: Number.isFinite(numMin) ? numMin : undefined,
+      priceMax: Number.isFinite(numMax) ? numMax : undefined,
     });
     onClose?.();
   };
 
   const handleReset = () => {
+    const empty = createEmptyFilters();
     setSort('');
     setMinPrice('');
     setMaxPrice('');
-    setExclusive(false);
-    setFree(false);
-    setSameDigits(false);
-    setSameLetters(false);
-    setFirstTen(false);
-    setRoundHundreds(false);
-    onChange?.({
-      priceSort: undefined,
-      priceMin: undefined,
-      priceMax: undefined,
-      exclusive: false,
-      free: false,
-      sameDigits: false,
-      sameLetters: false,
-      firstTen: false,
-      roundHundreds: false,
-    });
+    setPositions(positionsFromValue(empty));
+    onChange?.(empty);
     onClose?.();
   };
 
@@ -109,21 +76,17 @@ export function FilterModal({ open, onClose, value, onChange }) {
         <fieldset className={styles.fieldset}>
           <legend className={styles.legend}>Параметры</legend>
           <div className={styles.checkboxGroup}>
-            {CHECKBOX_FILTERS.map(({ key, label }) => {
-              const checked = key === 'exclusive' ? exclusive : key === 'free' ? free : key === 'sameDigits' ? sameDigits : key === 'sameLetters' ? sameLetters : key === 'firstTen' ? firstTen : roundHundreds;
-              const setChecked = key === 'exclusive' ? setExclusive : key === 'free' ? setFree : key === 'sameDigits' ? setSameDigits : key === 'sameLetters' ? setSameLetters : key === 'firstTen' ? setFirstTen : setRoundHundreds;
-              return (
-                <label key={key} className={styles.checkboxLabel}>
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={(e) => setChecked(e.target.checked)}
-                    className={styles.checkbox}
-                  />
-                  <span className={styles.checkboxText}>{label}</span>
-                </label>
-              );
-            })}
+            {FILTER_OPTIONS.map(({ key, label }) => (
+              <label key={key} className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={Boolean(positions[key])}
+                  onChange={() => setPositions((prev) => ({ ...prev, [key]: !prev[key] }))}
+                  className={styles.checkbox}
+                />
+                <span className={styles.checkboxText}>{label}</span>
+              </label>
+            ))}
           </div>
         </fieldset>
 

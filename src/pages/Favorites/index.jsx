@@ -1,11 +1,13 @@
 import { useMemo } from 'react';
 import { useFavorites } from '../../context/FavoritesContext';
+import { useTelegram } from '../../context/TelegramContext';
 import { NumberCard } from '../../components/NumberCard';
 import { useNumbers } from '../../hooks/useNumbers';
 import styles from './index.module.scss';
 
 export function Favorites() {
   const { favorites } = useFavorites();
+  const { isFromTelegram } = useTelegram();
   const { numbers: numbersData, loading } = useNumbers();
 
   const favoriteItems = useMemo(() => {
@@ -23,8 +25,12 @@ export function Favorites() {
           {loading
             ? 'Загрузка...'
             : isEmpty
-              ? 'Здесь появятся номера, которые вы добавите в избранное.'
-              : `Добавлено номеров: ${favoriteItems.length}`}
+              ? (isFromTelegram
+                ? 'Добавьте номер в избранное — бот напишет, если цена снизится.'
+                : 'Здесь появятся номера, которые вы добавите в избранное.')
+              : (isFromTelegram
+                ? `Добавлено номеров: ${favoriteItems.length}. Если цена снизится, бот пришлёт сообщение.`
+                : `Добавлено номеров: ${favoriteItems.length}`)}
         </p>
       </header>
 

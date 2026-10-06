@@ -35,6 +35,23 @@
   flex: 1;
 }
 
+.syncBox {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(16, 51, 29, 0.06);
+}
+
+.syncText {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: #10331d;
+}
+
 .form {
   display: flex;
   flex-direction: column;
@@ -112,13 +129,14 @@
 
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 20px;
 }
 
 .tab,
 .tabActive {
-  flex: 1;
+  flex: 1 1 calc(50% - 4px);
   padding: 10px 14px;
   font-size: 0.95rem;
   font-family: inherit;
@@ -240,4 +258,162 @@
   font-size: 0.95rem;
   color: #10331d;
   opacity: 0.8;
+}
+
+.deletePanel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.deleteToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.deleteCount {
+  font-size: 0.85rem;
+  color: #10331d;
+  opacity: 0.8;
+  text-align: right;
+}
+
+.deleteList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: min(60vh, 560px);
+  overflow: auto;
+}
+
+.deleteRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f5f7f5;
+  border: 1px solid rgba(16, 51, 29, 0.12);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.deleteRow input {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.deleteInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.deleteNumber {
+  font-weight: 600;
+  color: #10331d;
+}
+
+.deleteMeta {
+  font-size: 0.85rem;
+  color: #10331d;
+  opacity: 0.75;
+}
+
+.deletePrice {
+  font-size: 0.9rem;
+  color: #10331d;
+  white-space: nowrap;
+}
+
+.requestsPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.requestList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.requestItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  background: #f5f7f5;
+  border: 1px solid rgba(16, 51, 29, 0.12);
+  border-radius: 12px;
+}
+
+.requestInfo {
+  min-width: 0;
+}
+
+.requestPlate {
+  margin: 0 0 2px;
+  font-weight: 600;
+  color: #10331d;
+}
+
+.requestMeta {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #10331d;
+  opacity: 0.75;
+
+  a {
+    color: #10331d;
+  }
+}
+
+.requestRemove {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: #9b1c1c;
+  font-family: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.deleteBtn {
+  padding: 14px 16px;
+  font-size: 1rem;
+  font-weight: 500;
+  font-family: inherit;
+  color: #9b1c1c;
+  background: #fde8e8;
+  border: 1px solid #fecaca;
+  border-radius: 14px;
+  cursor: pointer;
+  width: 100%;
+
+  &:hover:not(:disabled) {
+    background: #fecaca;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
 }

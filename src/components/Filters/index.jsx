@@ -1,13 +1,5 @@
+import { FILTER_OPTIONS } from '../../utils/numberFilters';
 import styles from './index.module.scss';
-
-const FILTER_OPTIONS = [
-  { key: 'vip', label: 'Эксклюзивный' },
-  { key: 'free', label: 'Свободные' },
-  { key: 'sameDigits', label: 'Одинаковые цифры' },
-  { key: 'sameLetters', label: 'Одинаковые буквы' },
-  { key: 'firstTen', label: 'Первая десятка' },
-  { key: 'roundHundreds', label: 'Ровные сотни' },
-];
 
 export function Filters({ selected, onChange }) {
   return (

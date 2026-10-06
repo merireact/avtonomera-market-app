@@ -1,15 +1,14 @@
-import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { NumberCard } from '../../components/NumberCard';
 import { Tabs } from '../../components/Tabs';
 import { FilterModal } from '../../components/FilterModal';
-import { ReviewCard } from '../../components/ReviewCard';
-import { useReviews } from '../../hooks/useReviews';
+import { ValuationModal } from '../../components/ValuationModal';
 import { useNumbers } from '../../hooks/useNumbers';
 import { getRegionForFilter } from '../../utils/regions';
-import { hasSameMiddleDigits, hasSameLetters, isFirstTen, isRoundHundreds } from '../../utils/numberUtils';
+import { matchesNumberSearch } from '../../utils/numberUtils';
+import { applyNumberFilters, createEmptyFilters, isAnyFilterActive } from '../../utils/numberFilters';
 import styles from './index.module.scss';
 
 const REGION_TABS = [
@@ -17,91 +16,41 @@ const REGION_TABS = [
   { value: 'region', label: 'Московская область' },
 ];
 
-function getPriceNum(item) {
-  const p = item.price;
-  if (typeof p === 'number') return p;
-  return null; // договорная
-}
+const PAGE_STEP = 8;
+const PHONE_HREF = 'tel:+79995999177';
+const TELEGRAM_URL = 'https://t.me/nomeramarket_direct';
 
 export function Home() {
-  const navigate = useNavigate();
-  const { reviews: reviewsData, loading: reviewsLoading } = useReviews();
   const { numbers: numbersData, loading: numbersLoading } = useNumbers();
   const [region, setRegion] = useState('moscow');
   const [search, setSearch] = useState('');
   const [filterModalOpen, setFilterModalOpen] = useState(false);
-  const [filterValues, setFilterValues] = useState({
-    priceSort: undefined,
-    priceMin: undefined,
-    priceMax: undefined,
-    exclusive: false,
-    free: false,
-    sameDigits: false,
-    sameLetters: false,
-    firstTen: false,
-    roundHundreds: false,
-  });
+  const [valuationOpen, setValuationOpen] = useState(false);
+  const [filterValues, setFilterValues] = useState(createEmptyFilters);
+  const [visibleCount, setVisibleCount] = useState(PAGE_STEP);
 
-  const featuredNumbers = useMemo(() => {
-    if (!numbersData.length) return [];
-    let list = numbersData.filter((n) => {
-      const numberRegion = getRegionForFilter(n);
+  useEffect(() => {
+    setVisibleCount(PAGE_STEP);
+  }, [region, search, filterValues]);
+
+  const filteredNumbers = useMemo(() => {
+    const list = numbersData.filter((item) => {
+      const numberRegion = getRegionForFilter(item);
       if (region === 'moscow' && numberRegion !== 'Москва') return false;
       if (region === 'region' && numberRegion !== 'Московская область') return false;
-      if (search.trim()) {
-        const q = search.trim().toLowerCase();
-        if (!n.number.toLowerCase().includes(q) && !n.city.toLowerCase().includes(q)) return false;
-      }
+      if (search.trim() && !matchesNumberSearch(item.number, item.city, search)) return false;
       return true;
     });
-
-    const { priceMin, priceMax, priceSort, exclusive, free, sameDigits, sameLetters, firstTen, roundHundreds } = filterValues;
-    if (exclusive) list = list.filter((n) => n.vip);
-    if (free) list = list.filter((n) => n.status === 'Свободен');
-    if (sameDigits) list = list.filter((n) => hasSameMiddleDigits(n.number));
-    if (sameLetters) list = list.filter((n) => hasSameLetters(n.number));
-    if (firstTen) list = list.filter((n) => isFirstTen(n.number));
-    if (roundHundreds) list = list.filter((n) => isRoundHundreds(n.number));
-    if (priceMin != null || priceMax != null) {
-      list = list.filter((n) => {
-        const num = getPriceNum(n);
-        if (num === null) return false;
-        if (priceMin != null && num < priceMin) return false;
-        if (priceMax != null && num > priceMax) return false;
-        return true;
-      });
-    }
-    if (priceSort === 'asc') {
-      list = [...list].sort((a, b) => {
-        const pa = getPriceNum(a);
-        const pb = getPriceNum(b);
-        if (pa === null && pb === null) return 0;
-        if (pa === null) return 1;
-        if (pb === null) return -1;
-        return pa - pb;
-      });
-    } else if (priceSort === 'desc') {
-      list = [...list].sort((a, b) => {
-        const pa = getPriceNum(a);
-        const pb = getPriceNum(b);
-        if (pa === null && pb === null) return 0;
-        if (pa === null) return 1;
-        if (pb === null) return -1;
-        return pb - pa;
-      });
-    }
-    return list.slice(0, 8);
+    return applyNumberFilters(list, filterValues);
   }, [numbersData, region, search, filterValues]);
+
+  const visibleNumbers = filteredNumbers.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredNumbers.length;
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <div className={styles.brand}>
-          {/* <img
-            src="https://i.postimg.cc/dQb954b2/Snimok-ekrana-2026-03-14-v-22-54-22-Photoroom.png"
-            alt="Avtonomera Market"
-            className={styles.brandLogo}
-          /> */}
           <span className={styles.brandName}>Avtonomera Market</span>
         </div>
         <Tabs tabs={REGION_TABS} activeValue={region} onChange={setRegion} />
@@ -120,9 +69,7 @@ export function Home() {
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
             </svg>
-            {(filterValues.priceSort || filterValues.priceMin != null || filterValues.priceMax != null || filterValues.exclusive || filterValues.free || filterValues.sameDigits || filterValues.sameLetters || filterValues.firstTen || filterValues.roundHundreds) && (
-              <span className={styles.filterBadge} aria-hidden />
-            )}
+            {isAnyFilterActive(filterValues) && <span className={styles.filterBadge} aria-hidden />}
           </button>
         </div>
 
@@ -138,80 +85,56 @@ export function Home() {
           {numbersLoading ? (
             <p className={styles.reviewsLoading}>Загрузка номеров...</p>
           ) : (
-          <ul className={styles.cardList}>
-            {featuredNumbers.map((item) => (
-              <li key={item.id}>
-                <NumberCard item={item} />
-              </li>
-            ))}
-          </ul>
-          )}
-          {!numbersLoading && (
-          <div className={styles.showMore}>
-            <Button
-              onClick={() =>
-                navigate('/numbers', {
-                  state: {
-                    region,
-                    search: search.trim(),
-                    filters: {
-                      exclusive: filterValues.exclusive,
-                      free: filterValues.free,
-                      sameDigits: filterValues.sameDigits,
-                      sameLetters: filterValues.sameLetters,
-                      firstTen: filterValues.firstTen,
-                      roundHundreds: filterValues.roundHundreds,
-                    },
-                  },
-                })
-              }
-              className={styles.showMoreBtn}
-            >
-              <span className={styles.btnIcon} aria-hidden>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="8" y1="6" x2="21" y2="6" />
-                  <line x1="8" y1="12" x2="21" y2="12" />
-                  <line x1="8" y1="18" x2="21" y2="18" />
-                  <line x1="3" y1="6" x2="3.01" y2="6" />
-                  <line x1="3" y1="12" x2="3.01" y2="12" />
-                  <line x1="3" y1="18" x2="3.01" y2="18" />
-                </svg>
-              </span>
-              Показать больше номеров
-            </Button>
-          </div>
+            <>
+              {visibleNumbers.length === 0 ? (
+                <p className={styles.reviewsLoading}>Нет номеров по выбранным фильтрам</p>
+              ) : (
+                <ul className={styles.cardList}>
+                  {visibleNumbers.map((item) => (
+                    <li key={item.id}>
+                      <NumberCard item={item} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {hasMore && (
+                <div className={styles.showMore}>
+                  <Button onClick={() => setVisibleCount((count) => count + PAGE_STEP)} className={styles.showMoreBtn}>
+                    <span className={styles.btnIcon} aria-hidden>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="8" y1="6" x2="21" y2="6" />
+                        <line x1="8" y1="12" x2="21" y2="12" />
+                        <line x1="8" y1="18" x2="21" y2="18" />
+                        <line x1="3" y1="6" x2="3.01" y2="6" />
+                        <line x1="3" y1="12" x2="3.01" y2="12" />
+                        <line x1="3" y1="18" x2="3.01" y2="18" />
+                      </svg>
+                    </span>
+                    Показать больше номеров
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </section>
 
-        <section className={styles.reviews}>
-          <h2 className={styles.sectionTitle}>Отзывы</h2>
-          {reviewsLoading ? (
-            <p className={styles.reviewsLoading}>Загрузка отзывов...</p>
-          ) : (
-            <div className={styles.reviewsScroll}>
-              {reviewsData.map((review) => (
-                <div key={review.id} className={styles.reviewCardWrap}>
-                  <ReviewCard {...review} />
-                </div>
-              ))}
-            </div>
-          )}
-          <div className={styles.leaveReview}>
-            <Button
-              variant="secondary"
-              onClick={() => navigate('/reviews', { state: { openReview: true } })}
-              className={styles.leaveReviewBtn}
-            >
-              <span className={styles.btnIcon} aria-hidden>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg>
-              </span>
-              Оставить отзыв
-            </Button>
+        <section className={styles.contacts}>
+          <h2 className={styles.sectionTitle}>Контакты</h2>
+          <div className={styles.contactActions}>
+            <a href={PHONE_HREF} className={styles.contactBtn}>
+              <span>+7 999 599-91-77</span>
+            </a>
+            <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" className={styles.contactBtn}>
+              <span>@nomeramarket_direct</span>
+            </a>
           </div>
+          <Button variant="secondary" onClick={() => setValuationOpen(true)} className={styles.valuationBtn}>
+            Оценка вашего номера
+          </Button>
         </section>
       </main>
+
+      <ValuationModal open={valuationOpen} onClose={() => setValuationOpen(false)} />
     </div>
   );
 }

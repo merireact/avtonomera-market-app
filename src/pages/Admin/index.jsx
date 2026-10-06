@@ -2,9 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { addNumber as apiAddNumber } from '../../api/numbers';
+import { requestCatalogSync } from '../../api/syncAutonomera';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { AdminAnalytics } from './AdminAnalytics';
+import { AdminDelete } from './AdminDelete';
+import { AdminRequests } from './AdminRequests';
 import { getRegionByNumber } from '../../utils/regions';
 import { hasSameMiddleDigits, hasSameLetters, isFirstTen, isRoundHundreds } from '../../utils/numberUtils';
 import styles from './index.module.scss';
@@ -29,9 +32,14 @@ export function Admin() {
   const [sameLetters, setSameLetters] = useState(false);
   const [firstTen, setFirstTen] = useState(false);
   const [roundHundreds, setRoundHundreds] = useState(false);
+  const [isAuto, setIsAuto] = useState(false);
+  const [isOther, setIsOther] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [syncLoading, setSyncLoading] = useState(false);
+  const [syncError, setSyncError] = useState(null);
+  const [syncMessage, setSyncMessage] = useState('');
 
   useEffect(() => {
     if (number.trim()) {
@@ -73,6 +81,23 @@ export function Admin() {
     }
   };
 
+  const handleSync = async () => {
+    setSyncLoading(true);
+    setSyncError(null);
+    setSyncMessage('');
+    const { data, error } = await requestCatalogSync({ force: true });
+    setSyncLoading(false);
+    if (error) {
+      setSyncError(error);
+      return;
+    }
+    const added = data?.added || 0;
+    const updated = data?.updated || 0;
+    const removed = data?.removed || 0;
+    setSyncMessage(`Готово: добавлено ${added}, обновлено ${updated}, снято с публикации ${removed}. Всего на сайте ${data?.total || 0}.`);
+    window.dispatchEvent(new Event('catalog-synced'));
+  };
+
   const handleAddNumber = async (e) => {
     e.preventDefault();
     setSubmitError(null);
@@ -95,6 +120,8 @@ export function Admin() {
       firstTen,
       roundHundreds,
       beautiful: false,
+      isAuto,
+      isOther,
     });
     setSubmitLoading(false);
     if (error) {
@@ -109,6 +136,8 @@ export function Admin() {
     setSameLetters(false);
     setFirstTen(false);
     setRoundHundreds(false);
+    setIsAuto(false);
+    setIsOther(false);
   };
 
   if (authLoading) {
@@ -164,7 +193,10 @@ export function Admin() {
           </svg>
         </button>
         <h1 className={styles.title}>
-          {activeTab === 'add' ? 'Добавить номер' : 'Аналитика'}
+          {activeTab === 'add' && 'Добавить номер'}
+          {activeTab === 'delete' && 'Удалить номера'}
+          {activeTab === 'analytics' && 'Аналитика'}
+          {activeTab === 'requests' && 'Запросы'}
         </h1>
       </header>
 
@@ -174,7 +206,14 @@ export function Admin() {
           className={activeTab === 'add' ? styles.tabActive : styles.tab}
           onClick={() => setActiveTab('add')}
         >
-          Добавить номер
+          Добавить
+        </button>
+        <button
+          type="button"
+          className={activeTab === 'delete' ? styles.tabActive : styles.tab}
+          onClick={() => setActiveTab('delete')}
+        >
+          Удалить
         </button>
         <button
           type="button"
@@ -183,11 +222,33 @@ export function Admin() {
         >
           Аналитика
         </button>
+        <button
+          type="button"
+          className={activeTab === 'requests' ? styles.tabActive : styles.tab}
+          onClick={() => setActiveTab('requests')}
+        >
+          Запросы
+        </button>
       </nav>
 
       {activeTab === 'analytics' && <AdminAnalytics />}
+      {activeTab === 'delete' && <AdminDelete />}
+      {activeTab === 'requests' && <AdminRequests />}
 
       {activeTab === 'add' && (
+      <>
+      <section className={styles.syncBox}>
+        <p className={styles.syncText}>
+          Каталог повторяет объявления Avtonomera Market на autonomera777.
+          Новые номера подтягиваются при открытии приложения, если с прошлого обновления прошёл час, и каждый день в 9:00.
+          Снятые с сайта номера пропадают из мини-приложения, цена обновляется.
+        </p>
+        {syncError && <p className={styles.formError}>{syncError.message}</p>}
+        {syncMessage && <p className={styles.formSuccess}>{syncMessage}</p>}
+        <Button type="button" onClick={handleSync} disabled={syncLoading}>
+          {syncLoading ? 'Обновляю...' : 'Обновить с сайта сейчас'}
+        </Button>
+      </section>
       <form className={styles.form} onSubmit={handleAddNumber}>
         {submitError && <p className={styles.formError}>{submitError.message}</p>}
         {submitSuccess && <p className={styles.formSuccess}>Номер добавлен в каталог.</p>}
@@ -244,12 +305,21 @@ export function Admin() {
             <input type="checkbox" checked={roundHundreds} onChange={(e) => setRoundHundreds(e.target.checked)} />
             <span>Ровные сотни</span>
           </label>
+          <label className={styles.checkbox}>
+            <input type="checkbox" checked={isAuto} onChange={(e) => setIsAuto(e.target.checked)} />
+            <span>Авто</span>
+          </label>
+          <label className={styles.checkbox}>
+            <input type="checkbox" checked={isOther} onChange={(e) => setIsOther(e.target.checked)} />
+            <span>Иные</span>
+          </label>
         </div>
 
         <Button type="submit" className={styles.submitBtn} disabled={submitLoading}>
           {submitLoading ? 'Добавляю...' : 'Добавить номер'}
         </Button>
       </form>
+      </>
       )}
     </div>
   );

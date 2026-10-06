@@ -51,7 +51,11 @@ export function BottomTabBar() {
   return (
     <nav className={styles.bar} role="navigation" aria-label="Основное меню">
       {TABS.map(({ path, label, icon }) => {
-        const active = path === '/' ? (pathname === '/' || pathname.startsWith('/numbers')) : pathname === path;
+        const active = path === '/'
+          ? (pathname === '/' || pathname.startsWith('/numbers'))
+          : path === '/profile'
+            ? (pathname === '/profile' || pathname.startsWith('/alerts'))
+            : pathname === path;
         return (
           <button
             key={path}

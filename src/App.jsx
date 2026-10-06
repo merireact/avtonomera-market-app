@@ -7,6 +7,7 @@ import { AppRouter } from './navigation/AppRouter';
 import { BottomTabBar } from './components/BottomTabBar';
 import { ScrollToTop } from './components/ScrollToTop';
 import { trackAppVisit } from './api/analytics';
+import { requestCatalogSync } from './api/syncAutonomera';
 import { useTelegram } from './context/TelegramContext';
 
 function AppContent() {
@@ -17,6 +18,19 @@ function AppContent() {
   useEffect(() => {
     if (location.pathname !== '/admin') trackAppVisit(telegramUser ?? null);
   }, [telegramUser, location.pathname]);
+
+  useEffect(() => {
+    let cancelled = false;
+    requestCatalogSync().then(({ data }) => {
+      if (cancelled || !data?.ran) return;
+      if ((data.added || 0) + (data.updated || 0) + (data.removed || 0) > 0) {
+        window.dispatchEvent(new Event('catalog-synced'));
+      }
+    }).catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <>

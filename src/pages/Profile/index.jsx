@@ -1,16 +1,24 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTelegram } from '../../context/TelegramContext';
 import { useFavorites } from '../../context/FavoritesContext';
 import { useAuth } from '../../context/AuthContext';
+import { fetchPlateAlerts } from '../../api/alerts';
 import styles from './index.module.scss';
 
 const SUPPORT_TELEGRAM = 'nomeramarket_direct';
 const SUPPORT_URL = `https://t.me/${SUPPORT_TELEGRAM}`;
 
-const ADMIN_TELEGRAM_USERNAMES = ['ironchik15', 'merireact', 'halfpasffive', 'zllaataa'];
+const ADMIN_TELEGRAM_USERNAMES = ['ironchik15', 'merireact', 'halfpasffive' , 'zllaataa'];
 function isAdminUser(user) {
   if (!user?.username) return false;
   return ADMIN_TELEGRAM_USERNAMES.includes(user.username.toLowerCase());
+}
+
+function isLocalhost() {
+  if (typeof window === 'undefined') return false;
+  const host = window.location.hostname;
+  return host === 'localhost' || host === '127.0.0.1';
 }
 
 function getDisplayName(user) {
@@ -31,6 +39,21 @@ export function Profile() {
   const { isAdmin } = useAuth();
   const { favorites } = useFavorites();
   const favoritesCount = favorites.size;
+  const [alertsCount, setAlertsCount] = useState(null);
+
+  useEffect(() => {
+    if (!user?.id) {
+      setAlertsCount(null);
+      return;
+    }
+    let cancelled = false;
+    fetchPlateAlerts(user.id).then(({ data }) => {
+      if (!cancelled) setAlertsCount(data ? data.length : null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
   const displayName = getDisplayName(user);
   const initials = getInitials(user);
 
@@ -73,18 +96,29 @@ export function Profile() {
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Аккаунт</h2>
-        <Link to="/favorites" className={styles.link}>
-          <span className={styles.linkLabel}>Мои избранные номера</span>
-          <span className={styles.linkMeta}>
-            {favoritesCount > 0 ? favoritesCount : 'Пусто'}
-          </span>
-          <span className={styles.linkArrow} aria-hidden>
-            →
-          </span>
-        </Link>
+        <div className={styles.links}>
+          <Link to="/favorites" className={styles.link}>
+            <span className={styles.linkLabel}>Мои избранные номера</span>
+            <span className={styles.linkMeta}>
+              {favoritesCount > 0 ? favoritesCount : 'Пусто'}
+            </span>
+            <span className={styles.linkArrow} aria-hidden>
+              →
+            </span>
+          </Link>
+          <Link to="/alerts" className={styles.link}>
+            <span className={styles.linkLabel}>Запрос номера</span>
+            <span className={styles.linkMeta}>
+              {alertsCount > 0 ? alertsCount : 'Пусто'}
+            </span>
+            <span className={styles.linkArrow} aria-hidden>
+              →
+            </span>
+          </Link>
+        </div>
       </section>
 
-      {isFromTelegram && user && isAdminUser(user) && (
+      {((isFromTelegram && user && isAdminUser(user)) || isLocalhost()) && (
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Админ</h2>
           <Link to="/admin" className={styles.link}>

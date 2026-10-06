@@ -31,6 +31,8 @@ export function NumberDetail() {
   const [editVip, setEditVip] = useState(false);
   const [editSameDigits, setEditSameDigits] = useState(false);
   const [editSameLetters, setEditSameLetters] = useState(false);
+  const [editIsAuto, setEditIsAuto] = useState(false);
+  const [editIsOther, setEditIsOther] = useState(false);
   const [editSaving, setEditSaving] = useState(false);
   const [editDeleting, setEditDeleting] = useState(false);
   const [editError, setEditError] = useState(null);
@@ -48,6 +50,8 @@ export function NumberDetail() {
     setEditVip(Boolean(item.vip));
     setEditSameDigits(Boolean(item.sameDigits));
     setEditSameLetters(Boolean(item.sameLetters));
+    setEditIsAuto(Boolean(item.isAuto));
+    setEditIsOther(Boolean(item.isOther));
     setEditError(null);
     setEditOpen(true);
   }, [item]);
@@ -69,6 +73,8 @@ export function NumberDetail() {
       vip: editVip,
       sameDigits: editSameDigits,
       sameLetters: editSameLetters,
+      isAuto: editIsAuto,
+      isOther: editIsOther,
     });
     setEditSaving(false);
     if (error) {
@@ -77,7 +83,7 @@ export function NumberDetail() {
     }
     await refetchNumbers();
     closeEdit();
-  }, [item, editStatus, editPrice, editVip, editSameDigits, editSameLetters, refetchNumbers, closeEdit]);
+  }, [item, editStatus, editPrice, editVip, editSameDigits, editSameLetters, editIsAuto, editIsOther, refetchNumbers, closeEdit]);
 
   const handleEditDelete = useCallback(async () => {
     if (!item) return;
@@ -147,7 +153,7 @@ export function NumberDetail() {
             <button
               type="button"
               className={styles.favorite}
-              onClick={() => toggleFavorite(item.id)}
+              onClick={() => toggleFavorite(item.id, item.price)}
               aria-label={favorite ? 'Убрать из избранного' : 'В избранное'}
             >
               <svg width="28" height="28" viewBox="0 0 24 24" fill={favorite ? '#10331d' : 'none'} stroke="#10331d" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -171,9 +177,11 @@ export function NumberDetail() {
             </div>
           </dl>
 
-          {(item.vip || hasSameMiddleDigits(item.number) || hasSameLetters(item.number)) && (
+          {(item.vip || item.isAuto || item.isOther || hasSameMiddleDigits(item.number) || hasSameLetters(item.number)) && (
             <div className={styles.tags}>
               {item.vip && <span className={styles.tag}>Эксклюзивный</span>}
+              {item.isAuto && <span className={styles.tag}>Авто</span>}
+              {item.isOther && <span className={styles.tag}>Иные</span>}
               {hasSameMiddleDigits(item.number) && <span className={styles.tag}>Одинаковые цифры</span>}
               {hasSameLetters(item.number) && <span className={styles.tag}>Одинаковые буквы</span>}
             </div>
@@ -247,6 +255,14 @@ export function NumberDetail() {
             <label className={styles.editCheckbox}>
               <input type="checkbox" checked={editSameLetters} onChange={(e) => setEditSameLetters(e.target.checked)} />
               <span>Одинаковые буквы</span>
+            </label>
+            <label className={styles.editCheckbox}>
+              <input type="checkbox" checked={editIsAuto} onChange={(e) => setEditIsAuto(e.target.checked)} />
+              <span>Авто</span>
+            </label>
+            <label className={styles.editCheckbox}>
+              <input type="checkbox" checked={editIsOther} onChange={(e) => setEditIsOther(e.target.checked)} />
+              <span>Иные</span>
             </label>
           </div>
           <div className={styles.editActions}>

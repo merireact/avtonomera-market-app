@@ -79,6 +79,12 @@
   margin-bottom: 24px;
 }
 
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .sectionTitle {
   font-family: 'Inter', sans-serif;
   font-size: 0.75rem;

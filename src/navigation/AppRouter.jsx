@@ -5,6 +5,7 @@ import { NumberDetail } from '../pages/NumberDetail';
 import { Favorites } from '../pages/Favorites';
 import { Reviews } from '../pages/Reviews';
 import { Profile } from '../pages/Profile';
+import { Alerts } from '../pages/Alerts';
 import { Admin } from '../pages/Admin';
 
 export function AppRouter() {
@@ -16,6 +17,7 @@ export function AppRouter() {
       <Route path="/favorites" element={<Favorites />} />
       <Route path="/reviews" element={<Reviews />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/alerts" element={<Alerts />} />
       <Route path="/admin" element={<Admin />} />
     </Routes>
   );
