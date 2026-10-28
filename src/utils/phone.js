@@ -3,14 +3,12 @@ export const PHONE_LABEL = '+7 999 599-91-77';
 export const PHONE_HREF = `tel:${PHONE_NUMBER}`;
 
 /**
- * Telegram WebView блокирует tel:-ссылки (особенно на iOS), поэтому внутри
- * мини-приложения открываем страницу-редирект во внешнем браузере — она
- * сразу передаёт номер в звонилку телефона.
+ * Внутри Telegram обычный переход по tel: WebView глотает молча. Ссылку,
+ * открытую в новом окне, Telegram отдаёт системе — и сразу открывается
+ * звонилка с набранным номером, без промежуточных страниц.
  */
 export function handlePhoneClick(event) {
-  const webApp = window.Telegram?.WebApp;
-  if (!webApp?.initData || typeof webApp.openLink !== 'function') return;
+  if (!window.Telegram?.WebApp?.initData) return;
   event.preventDefault();
-  const base = `${window.location.origin}${process.env.PUBLIC_URL || ''}`;
-  webApp.openLink(`${base}/call.html?tel=${encodeURIComponent(PHONE_NUMBER)}`);
+  window.open(PHONE_HREF, '_blank');
 }

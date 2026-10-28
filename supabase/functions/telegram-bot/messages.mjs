@@ -25,9 +25,25 @@ export function formatNumberLine(row) {
   return [number, city, formatPrice(row?.price), status].filter(Boolean).join(' — ');
 }
 
+function commandName(text) {
+  return String(text ?? '').trim().split(/\s+/)[0]?.split('@')[0]?.toLowerCase();
+}
+
 export function isNumbersCommand(text) {
-  const command = String(text ?? '').trim().split(/\s+/)[0]?.split('@')[0]?.toLowerCase();
-  return command === '/numbers';
+  return commandName(text) === '/numbers';
+}
+
+export function isStartCommand(text) {
+  return commandName(text) === '/start';
+}
+
+export const DEFAULT_WELCOME = 'Добро пожаловать в Номера Маркет! Откройте каталог, чтобы выбрать красивый номер.';
+
+// На телефоне Telegram показывает описание бота в пустом чате, а на компьютере
+// после старта чата его не видно, поэтому повторяем тот же текст в ответ на /start.
+export function welcomeText(description) {
+  const text = String(description ?? '').trim();
+  return text || DEFAULT_WELCOME;
 }
 
 export function catalogMessages(rows) {

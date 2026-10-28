@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { catalogMessages, formatPrice, isNumbersCommand } from './messages.mjs';
+import {
+  DEFAULT_WELCOME,
+  catalogMessages,
+  formatPrice,
+  isNumbersCommand,
+  isStartCommand,
+  welcomeText,
+} from './messages.mjs';
 
 test('isNumbersCommand accepts the command with a bot name', () => {
   assert.equal(isNumbersCommand('/numbers'), true);
@@ -30,4 +37,17 @@ test('catalogMessages splits a long list under the telegram limit', () => {
 
 test('catalogMessages reports an empty catalog', () => {
   assert.deepEqual(catalogMessages([]), ['В каталоге пока нет номеров.']);
+});
+
+test('isStartCommand accepts /start with a payload or bot name', () => {
+  assert.equal(isStartCommand('/start'), true);
+  assert.equal(isStartCommand('/start@nomeramarket_bot'), true);
+  assert.equal(isStartCommand('/start promo'), true);
+  assert.equal(isStartCommand('/numbers'), false);
+});
+
+test('welcomeText reuses the bot description and falls back to a default', () => {
+  assert.equal(welcomeText('  Привет!  '), 'Привет!');
+  assert.equal(welcomeText(''), DEFAULT_WELCOME);
+  assert.equal(welcomeText(undefined), DEFAULT_WELCOME);
 });

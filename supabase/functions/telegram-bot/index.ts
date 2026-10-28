@@ -1,5 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
-import { catalogMessages, isNumbersCommand } from './messages.mjs';
+import { catalogMessages, isNumbersCommand, isStartCommand, welcomeText } from './messages.mjs';
+
+const APP_URL = Deno.env.get('MINI_APP_URL') ?? 'https://merireact.github.io/avtonomera-market-app';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -65,6 +67,26 @@ async function ensureCommands(token) {
   }
 }
 
+async function sendWelcome(token, chatId, languageCode) {
+  let description = '';
+  try {
+    const { result } = await telegram(token, 'getMyDescription', languageCode ? { language_code: languageCode } : {});
+    description = result?.description || '';
+    if (!description && languageCode) {
+      description = (await telegram(token, 'getMyDescription', {})).result?.description || '';
+    }
+  } catch {
+    description = '';
+  }
+  await telegram(token, 'sendMessage', {
+    chat_id: chatId,
+    text: welcomeText(description),
+    reply_markup: {
+      inline_keyboard: [[{ text: 'Открыть каталог', web_app: { url: APP_URL } }]],
+    },
+  });
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
@@ -85,7 +107,8 @@ Deno.serve(async (req) => {
   const message = update?.message;
   const text = message?.text;
   const chatId = message?.chat?.id;
-  if (!text || chatId == null || !isNumbersCommand(text)) return json({ ok: true });
+  const isStart = isStartCommand(text);
+  if (!text || chatId == null || (!isStart && !isNumbersCommand(text))) return json({ ok: true });
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
@@ -96,6 +119,10 @@ Deno.serve(async (req) => {
     const token = await botToken(admin);
     if (!token) return json({ error: 'Нет токена бота' }, 500);
     await ensureCommands(token);
+    if (isStart) {
+      await sendWelcome(token, chatId, message?.from?.language_code);
+      return json({ ok: true });
+    }
     const rows = await fetchCatalog(admin);
     for (const part of catalogMessages(rows)) {
       await telegram(token, 'sendMessage', {
