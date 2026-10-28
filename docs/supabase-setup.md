@@ -455,6 +455,27 @@ alter table public.numbers
 
 Сообщение дойдёт только тем, кто хотя бы раз открыл бота и нажал Start.
 
+## Команда /numbers
+
+Сообщение `/numbers` в боте присылает весь каталог: номер, город, цену и статус. Длинный список приходит несколькими сообщениями.
+
+1. В **SQL Editor** выполните `supabase/migrations/20261010170000_telegram_bot_token.sql`.
+2. Задеплойте функцию:
+
+```bash
+supabase functions deploy telegram-bot --no-verify-jwt
+```
+
+3. Подключите её как webhook бота (токен тот же, что в Vault):
+
+```bash
+curl -s "https://api.telegram.org/bot<ТОКЕН>/setWebhook" \
+  -d "url=https://bqdfazpbbioigebpargd.supabase.co/functions/v1/telegram-bot" \
+  -d "allowed_updates=[\"message\"]"
+```
+
+После этого команда появится в меню бота при первом сообщении.
+
 ## Синхронизация с autonomera777
 
 Каталог мини-приложения повторяет активные объявления продавца [Avtonomera Market](https://autonomera777.ru/user?user_id=55597). Пароль от сайта не нужен: читается публичная страница.
