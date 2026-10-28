@@ -85,6 +85,9 @@ Deno.serve(async (req) => {
 
   try {
     const listings = await fetchSellerListings();
+    if (listings.length === 0) {
+      throw new Error('autonomera777 вернул пустой каталог, синхронизация остановлена');
+    }
     const { data: existing, error: existingError } = await admin
       .from('numbers')
       .select('id, number, city, status, external_id, source, vip, price');
@@ -99,7 +102,6 @@ Deno.serve(async (req) => {
       if (key && !byPlate.has(key)) byPlate.set(key, row);
     }
 
-    const seenExternal = new Set(listings.map((item) => item.externalId));
     const usedIds = new Set();
     const toInsert = [];
     const toUpdate = [];
@@ -145,11 +147,10 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Каталог зеркалит autonomera777 полностью: всё, что не выложено там
+    // (ручные номера, проданные, дубли), удаляется.
     const staleIds = rows
-      .filter((row) => row.source === 'autonomera'
-        && row.external_id
-        && !seenExternal.has(String(row.external_id))
-        && !usedIds.has(row.id))
+      .filter((row) => !usedIds.has(row.id))
       .map((row) => row.id);
 
     for (let i = 0; i < toUpdate.length; i += 15) {

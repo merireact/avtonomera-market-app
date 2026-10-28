@@ -9,6 +9,7 @@ import { useNumbers } from '../../hooks/useNumbers';
 import { getRegionForFilter } from '../../utils/regions';
 import { matchesNumberSearch } from '../../utils/numberUtils';
 import { applyNumberFilters, createEmptyFilters, isAnyFilterActive } from '../../utils/numberFilters';
+import { PHONE_HREF, PHONE_LABEL, handlePhoneClick } from '../../utils/phone';
 import styles from './index.module.scss';
 
 const REGION_TABS = [
@@ -17,7 +18,6 @@ const REGION_TABS = [
 ];
 
 const PAGE_STEP = 8;
-const PHONE_HREF = 'tel:+79995999177';
 const TELEGRAM_URL = 'https://t.me/nomeramarket_direct';
 
 export function Home() {
@@ -121,8 +121,8 @@ export function Home() {
         <section className={styles.contacts}>
           <h2 className={styles.sectionTitle}>Контакты</h2>
           <div className={styles.contactActions}>
-            <a href={PHONE_HREF} className={styles.contactBtn}>
-              <span>+7 999 599-91-77</span>
+            <a href={PHONE_HREF} onClick={handlePhoneClick} className={styles.contactBtn}>
+              <span>{PHONE_LABEL}</span>
             </a>
             <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" className={styles.contactBtn}>
               <span>@nomeramarket_direct</span>

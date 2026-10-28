@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Звонок</title>
+  <style>
+    body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: -apple-system, system-ui, sans-serif; background: #fff; color: #111; }
+    a { display: inline-block; padding: 16px 28px; border-radius: 14px; background: #111; color: #fff; text-decoration: none; font-size: 20px; }
+  </style>
+</head>
+<body>
+  <a id="call" href="tel:+79995999177">Позвонить +7 999 599-91-77</a>
+  <script>
+    (function () {
+      var tel = new URLSearchParams(location.search).get('tel') || '';
+      if (!/^\+?\d{6,15}$/.test(tel)) tel = '+79995999177';
+      var link = document.getElementById('call');
+      link.href = 'tel:' + tel;
+      location.href = 'tel:' + tel;
+    })();
+  </script>
+</body>
+</html>
